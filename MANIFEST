@@ -1,0 +1,15 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Tk-GraphItems.t
+lib/Tk/GraphItems.pod
+lib/Tk/GraphItems/TextBox.pm
+lib/Tk/GraphItems/Connector.pm
+lib/Tk/GraphItems/GraphItem.pm
+lib/Tk/GraphItems/TiedCoord.pm
+lib/Tk/GraphItems/Examples/moving_items.pl
+lib/Tk/GraphItems/Examples/test_graph_items.pl
+lib/Tk/GraphItems/Examples/topo.pl
+
+META.yml                                 Module meta-data (added by MakeMaker)
