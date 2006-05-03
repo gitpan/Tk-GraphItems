@@ -4,9 +4,8 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     NAME              => 'Tk::GraphItems',
-    VERSION_FROM      => 'lib/Tk/GraphItems.pod', # finds $VERSION
-    PREREQ_PM         => {Tk=> 8.4}, # e.g., Module::Name => 1.1
-    #($] >= 5.005 ?     ## Add these new keywords supported since 5.005
-    ABSTRACT_FROM  => 'lib/Tk/GraphItems.pod', # retrieve abstract from module
+    VERSION_FROM      => 'lib/Tk/GraphItems.pm', # finds $VERSION
+    PREREQ_PM         => {Tk=> 8.4}, 
+    ABSTRACT_FROM  => 'lib/Tk/GraphItems.pm', # retrieve abstract from module
     AUTHOR         => 'Ch.Lamprecht <ch.l.ngre@online.de>',
 	     );

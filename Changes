@@ -3,3 +3,7 @@ Revision history for Perl extension Tk::GraphItems.
 0.01  Thu Apr 20 19:09:55 2006
 	
 	first version
+
+0.02  Added error-check  to GraphItem::_set_layer
+      Made GraphItems a wrapper for GraphItems::TextBox::new 
+      and GraphItems::Connector::new

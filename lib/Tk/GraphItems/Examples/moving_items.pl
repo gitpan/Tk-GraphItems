@@ -4,10 +4,10 @@ use warnings;
 use Tk;
 use Data::Dumper;
 use Scalar::Util qw/ weaken /;
-require Tk::GraphItems::TextBox;
-require Tk::GraphItems::Connector;
+#require Tk::GraphItems::TextBox;
+#require Tk::GraphItems::Connector;
 use Devel::Leak;
-
+require Tk::GraphItems;
 my $mw = tkinit();
 my$text;
 $mw->Label(-textvariable=>\$text)->pack;
@@ -23,13 +23,13 @@ my @conn;
 my @coords= map [(int rand 500)+50,(int rand 300) +50],(0..4);
 my %command;
 $command{build_items}=sub{
-  for my $n(0..4){$node[$n] = Tk::GraphItems::TextBox->new(canvas=>$can,
+  for my $n(0..4){$node[$n] = Tk::GraphItems->TextBox(canvas=>$can,
 							  text=>"object $n",
 							  'x'=>\$coords[$n][0],
 							  'y'=>\$coords[$n][1]
 							 );
 		}
-  for my $n(0..4){$conn[$n] = Tk::GraphItems::Connector->new(
+  for my $n(0..4){$conn[$n] = Tk::GraphItems->Connector(
 						 source=>$node[$n],
 						 target=>$node[($n+1)%5],
 						 colour =>'black'
@@ -104,7 +104,7 @@ $command{conn_width} = sub {
 $command{conn_colour} = sub {
   foreach(@conn){$_->colour($_->colour eq'red'?'black':'red')}
 };
-$command{'conn_free-loose_access'}=sub {
+$command{'conn_free'}=sub {
   weaken $_ for(@conn) ;
 };
 my $frame = $mw->Frame()->pack(-side=>'left');

@@ -32,7 +32,7 @@ Tk::GraphItems::Connector provides objects to display edges of relation-graphs o
 =head1 SEE ALSO
 
 Documentation of Tk::GraphItems::TextBox .
-Example in Tk::GraphItems.pod
+Examples in Tk/GraphItems/Examples
 
 =head1 METHODS
 
@@ -82,7 +82,7 @@ at your option, any later version of Perl 5 you may have available.
 
 =cut
 use 5.008;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Scalar::Util qw(weaken);
 #use Data::Dumper;

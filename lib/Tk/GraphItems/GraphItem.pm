@@ -7,8 +7,10 @@ use Scalar::Util qw(weaken);
 
 use strict;
 use warnings;
+use Carp;
+
 use 5.008;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub add_dependent{
   my ($self,$dependent) = @_;
@@ -28,9 +30,14 @@ sub dependents{
 sub _set_layer{
   my ($self,$layer)=@_;
   my $can = $self->get_canvas;
-  
+
   my $l_id = $can->{GraphItem_layers}[$layer];
+  unless ($can->type($l_id)){
+  croak "could not _set_layer.
+Canvas-item with id <$l_id> has been deleted by user.
+Be careful not to manipulate or delete Tk::GraphItems directly!" ;}
   $can->lower($_,$l_id)for $self->canvas_items;
+
 }
 sub _create_canvas_layers{
   my $self = shift;

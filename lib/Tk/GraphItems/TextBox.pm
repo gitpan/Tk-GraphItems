@@ -27,12 +27,12 @@ Tk::GraphItems::TextBox - Display nodes of relation-graphs on a Tk::Canvas
 
 =head1 DESCRIPTION
 
-Tk::GraphItems::TextBox provides objects to display nodes of relation-graphs on a Tk::Canvas widget. 
+Tk::GraphItems::TextBox provides objects to display nodes of relation-graphs on a Tk::Canvas widget.
 
 =head1 SEE ALSO
 
 Documentation of Tk::GraphItems::Connector.
-Example in Tk::GraphItems.pod.
+Examples in Tk/GraphItems/Examples.
 
 =head1 METHODS
 
@@ -96,7 +96,7 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 use 5.008;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 #use Data::Dumper;
 use Carp;

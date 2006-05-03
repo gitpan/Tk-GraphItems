@@ -3,7 +3,7 @@ Makefile.PL
 MANIFEST
 README
 t/Tk-GraphItems.t
-lib/Tk/GraphItems.pod
+lib/Tk/GraphItems.pm
 lib/Tk/GraphItems/TextBox.pm
 lib/Tk/GraphItems/Connector.pm
 lib/Tk/GraphItems/GraphItem.pm
