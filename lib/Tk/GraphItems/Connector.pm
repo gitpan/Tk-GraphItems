@@ -81,8 +81,8 @@ at your option, any later version of Perl 5 you may have available.
 
 
 =cut
-use 5.008;
-our $VERSION = '0.02';
+use 5.008001;
+our $VERSION = '0.03';
 
 use Scalar::Util qw(weaken);
 #use Data::Dumper;

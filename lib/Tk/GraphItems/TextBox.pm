@@ -95,14 +95,14 @@ at your option, any later version of Perl 5 you may have available.
 
 =cut
 
-use 5.008;
-our $VERSION = '0.02';
+use 5.008001;
+our $VERSION = '0.03';
 
 #use Data::Dumper;
 use Carp;
 use warnings;
 use strict;
-use Scalar::Util(qw/looks_like_number/);
+use Scalar::Util (qw/looks_like_number/);
 require Tk::GraphItems::GraphItem;
 require Tk::GraphItems::TiedCoord;
 our @ISA = ('Tk::GraphItems::GraphItem','Tk::GraphItems::Node');
@@ -320,6 +320,7 @@ sub text{
   my $can = $self->get_canvas;
   if (@_){
     $can->itemconfigure($self->{text_id},-text=>$_[0]);
+    #call _set_coords to resize TextBox
     $self->_set_coords($self->get_coords);
     return $self;
   }else{

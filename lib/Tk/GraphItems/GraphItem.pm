@@ -9,8 +9,8 @@ use strict;
 use warnings;
 use Carp;
 
-use 5.008;
-our $VERSION = '0.02';
+use 5.008001;
+our $VERSION = '0.03';
 
 sub add_dependent{
   my ($self,$dependent) = @_;
@@ -63,21 +63,21 @@ sub _register_instance{
   }
 }
 
-sub DESTROY{ 
+sub DESTROY{
   my $self = shift;
   my $can = $self->{canvas};
   my $obj_map = $can->{GraphItemsMap};
+  #my $text = $self->text()||'a GraphItem';
 
   for ($self->canvas_items){
-    $can->delete($_);
+    eval{$can->delete($_)};#if UNIVERSAL::isa($can,'Tk::Canvas');
     delete $obj_map->{$_};
   }
   # destroy dependents...?
   for ($self->dependents){
     eval{$_->destroy_myself}
   }
-  my $text = $self->{text}||'a GraphItem';
-  print "destroying $text\n";
+  #print "destroying $text\n";
 }
 
 
