@@ -11,3 +11,7 @@ Revision history for Perl extension Tk::GraphItems.
 0.03  Changed use VERSION to 5.008001 
       Changed Tk::GraphItems::GraphItem::DESTROY to silence warnings during
       global destruction.
+
+0.04  Added option autodestroy to Tk::GraphItems::Connector
+      Added option font to Tk::GraphItems::TextBox
+      Added example gi-graph.pl to demonstrate usage with Graph.pm

@@ -5,7 +5,7 @@
 
 package Tk::GraphItems::TiedCoord;
 use Scalar::Util(qw/weaken/);
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 sub TIESCALAR{
   my($class,$t_b,$c_in)=@_;
   my $self =  bless{TkGNode      =>$t_b,

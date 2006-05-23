@@ -40,11 +40,16 @@ B<Tk::GraphItems::Connector> supports the following methods:
 
 =over 4
 
-=item B<new(>source=>$a_GraphItems-Node,
-             target=>$a_GraphItems-NodeB<)>
+=item B<new(>source      => $a_GraphItems-Node,
+             target      => $a_GraphItems-NodeB,
+             colour      => $a_TkColour,
+             width       => $width_pixels,
+             arrow       => $where,
+             autodestroy => $bool<)>
 
 
 Create a new Connector instance and  display it on the Canvas of 'source' and 'target'.
+If 'autodestroy' is set to a true value, the Connector will get destroyed when its reference goes out of scope. This is recommended for easy use with Graph.pm or other models which allow to store objects for their edges. See gi-graph.pl for an example. The default for 'autodestroy' is 0. That means the Connector will stay 'alive' until either one of its source/target nodes gets destroyed or Connector->detach is called and references to Connector are deleted.
 
 =item B<colour(>[$a_Tk_colour]B<)>
 
@@ -82,7 +87,7 @@ at your option, any later version of Perl 5 you may have available.
 
 =cut
 use 5.008001;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Scalar::Util qw(weaken);
 #use Data::Dumper;
@@ -107,8 +112,8 @@ sub new{
     croak "wrong number of args! ";
   }
   my %args = @_;
-  my ($source,$target,$colour,$width,$arrow_type) = 
-    @args{qw/source target colour width arrow/};
+  my ($source,$target,$colour,$width,$arrow_type,$autodestroy) = 
+    @args{qw/source target colour width arrow autodestroy/};
   $arrow_type ||= 'target';
   for (qw/source target/){
     my $node = $args{$_};
@@ -135,17 +140,23 @@ sub new{
   }
 
 
-  my $self  = {line_id    => $id,
-	       dependents => {},
-	       canvas     => $can,
-	       source     => $source,
-	       target     => $target};
+  my $self  = {line_id     => $id,
+	       dependents  => {},
+	       canvas      => $can,
+	       source      => $source,
+	       target      => $target,
+	       autodestroy => $autodestroy ||= 0};
   bless $self , $class;
   $self->_register_instance;
   $self->_set_layer(0);
-  for (qw/source target/){$self->{$_}->add_dependent($self);
-			  $self->set_master($_,$self->{$_});
-			  weaken($self->{$_});}
+  for (qw/source target/){
+      if ($autodestroy){
+	  $self->{$_}->add_dependent_weak($self);
+      }else{
+	  $self->{$_}->add_dependent($self);
+      }
+      $self->set_master($_,$self->{$_});
+      weaken($self->{$_});}
   for (qw/source target/){
     $self->set_coords($_,$self->{$_}->connector_coords($self))
   };
@@ -256,7 +267,11 @@ sub _get_inst_by_id{
   return $obj_map->{$id}||undef;
 }
 
-
+sub DESTROY {
+    my $self = shift;
+    $self -> detach;
+    $self -> SUPER::DESTROY;
+}
 
 
 1;

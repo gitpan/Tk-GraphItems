@@ -11,10 +11,11 @@ Tk::GraphItems::TextBox - Display nodes of relation-graphs on a Tk::Canvas
   require Tk::GraphItems::TextBox;
   require Tk::GraphItems::Connector;
   ...
-  my $node = Tk::GraphItems::TextBox->new(canvas=>$can,
-					  text=>"new_node",
-					  'x'=>50,
-				       	  'y'=>50);
+  my $node = Tk::GraphItems::TextBox->new(canvas=> $can,
+					  text  => "new_node",
+                                          font  => ['Courier',8],
+					  'x'   => 50,
+				       	  'y'   => 50);
   $node->move(10,0);
   $node->set_coords(50,50);
   $node->text($node->text()."\nanother_line");
@@ -40,10 +41,11 @@ B<Tk::GraphItems::TextBox> supports the following methods:
 
 =over 4
 
-=item B<new(>canvas=>$a_canvas,
-             x     =>$x_coord,
-             y     =>$y_coord,
-             text  =>$textB<)>
+=item B<new(>canvas=> $a_canvas,
+             x     => $x_coord,
+             y     => $y_coord,
+             text  => $textB,
+             font  => $aTkFont<)>
 
 Return a new TextBox instance and display it on the given 'Canvas'. The canvas-items will be destroyed with the TextBox-instance when it goes out of scope.
 
@@ -96,7 +98,7 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 use 5.008001;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 #use Data::Dumper;
 use Carp;
@@ -117,7 +119,7 @@ sub new{
     croak "wrong number of args! ";
   }
   my %args = @_;
-  my ($can,$x,$y,$text) = @args{qw/canvas x y text/};
+  my ($can,$x,$y,$text,$font) = @args{qw/canvas x y text font/};
   eval {$can->isa('Tk::Canvas');$can->Exists;};
   croak "something is wrong with this 'canvas':<$can> $@" if $@;
   my $text_id;
@@ -125,11 +127,16 @@ sub new{
   @coords= map {ref($_)?$$_:$_} ($x,$y);
   eval{$text_id = $can->createText(@coords,
 				   -text => $text,
-				   -tags =>['TextBoxText',
+          			   -tags =>['TextBoxText',
 					    'TextBox',
 					    'TextBoxBind']);
      };
   croak "could not create TextBox at coords <$x>,<$y>: $@" if $@;
+
+  if ($font){
+      eval { $can -> itemconfigure ($text_id, -font=>$font) };
+      croak "could not set Font <$font>: $@" if $@;
+  }
 
   my $p = 3;
   my @bbox =  $can->bbox($text_id);

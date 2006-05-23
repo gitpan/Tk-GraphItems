@@ -10,13 +10,17 @@ use warnings;
 use Carp;
 
 use 5.008001;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub add_dependent{
-  my ($self,$dependent) = @_;
-  $self->{dependents}{$dependent} = $dependent;
+    my ($self,$dependent) = @_;
+    $self->{dependents}{$dependent} = $dependent;
 }
-
+sub add_dependent_weak{
+    my ($self,$dependent) = @_;
+    $self->add_dependent($dependent);
+    weaken($self->{dependents}{$dependent});
+}
 sub remove_dependent{
   my ($self,$dependent) = @_;
   delete $self->{dependents}{$dependent};
