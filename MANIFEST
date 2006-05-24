@@ -6,10 +6,12 @@ t/Tk-GraphItems.t
 lib/Tk/GraphItems.pm
 lib/Tk/GraphItems/TextBox.pm
 lib/Tk/GraphItems/Connector.pm
+lib/Tk/GraphItems/Circle.pm
 lib/Tk/GraphItems/GraphItem.pm
 lib/Tk/GraphItems/TiedCoord.pm
 lib/Tk/GraphItems/Examples/moving_items.pl
-lib/Tk/GraphItems/Examples/gi_graph.pl
+lib/Tk/GraphItems/Examples/gi_circles_graph.pl
+lib/Tk/GraphItems/Examples/gi_tb_graph.pl
 lib/Tk/GraphItems/Examples/test_graph_items.pl
 lib/Tk/GraphItems/Examples/topo.pl
 

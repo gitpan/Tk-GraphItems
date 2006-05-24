@@ -1,7 +1,13 @@
-Tk-GraphItems version 0.03
+Tk-GraphItems version 0.05
 ==========================
 
-Display graphical representations of relation-graphs on a Tk::Canvas-widget. This Package provides Tk::GraphItems::TextBox and Tk::GraphItems::Connector to build objects, representing a graphs nodes and edges. Nodes can be dragged manually or moved/placed programmatically. See the 'Examples' subdir for demonstration of the items options. One of the examples demonstrates how 'Tk::GraphItems' can be used with 'Graph' and  'Graph::Layout::Aesthetic' to visualize the iterative layout process of  'Graph::Layout::Aesthetic'. 
+Display graphical representations of relation-graphs on a Tk::Canvas-widget.
+This Package provides Tk::GraphItems::TextBox, Tk::GraphItems::Circle
+and Tk::GraphItems::Connector to build objects, representing a graphs nodes
+and edges. Nodes can be dragged manually or moved/placed programmatically.
+See the 'Examples' subdir for demonstration of the items options.
+Some of the examples demonstrate how 'Tk::GraphItems' can be used with
+'Graph.pm' and  'Graph::Layout::Aesthetic'. 
 
 
 

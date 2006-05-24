@@ -27,6 +27,14 @@ B<Tk::GraphItems> supports the following methods:
 
 Create a new Tk::GraphItems::TextBox instance and  display it on the Canvas.
 
+=item B<Circle(>canvas  => $can,
+	        colour  => $a_TkColor,
+                size    => $size_pixels,
+	        'x'     => 50,
+		'y'     => 50B<)>
+
+Create a new Tk::GraphItems::Circle instance and  display it on the Canvas.
+
 =item B<Connector(>source=> $source_node, target=> $target_nodeB<)>
 
 Create a new Tk::GraphItems::Connector instance.
@@ -35,7 +43,8 @@ Create a new Tk::GraphItems::Connector instance.
 
 =head1 SEE ALSO
 
-Documentation of Tk::GraphItems::TextBox and Tk::GraphItems::Connector.
+Documentation of Tk::GraphItems::TextBox, Tk::GraphItems::Connector and
+Tk::GraphItems::Circle.
 
 Examples in Tk/GraphItems/Examples
 
@@ -55,8 +64,9 @@ at your option, any later version of Perl 5 you may have available.
 
 =cut
 package Tk::GraphItems;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 require Tk::GraphItems::TextBox;
+require Tk::GraphItems::Circle;
 require Tk::GraphItems::Connector;
 
 sub TextBox{
@@ -67,5 +77,9 @@ sub TextBox{
 sub Connector{
   shift;
   Tk::GraphItems::Connector->new(@_);
+}
+sub Circle{
+  shift;
+  Tk::GraphItems::Circle->new(@_);
 }
 1;

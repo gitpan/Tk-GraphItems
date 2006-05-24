@@ -98,7 +98,7 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 use 5.008001;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 #use Data::Dumper;
 use Carp;
@@ -111,56 +111,54 @@ our @ISA = ('Tk::GraphItems::GraphItem','Tk::GraphItems::Node');
 
 
 sub new{
-  my $class = shift;
-  if (ref $class){
-    croak "new has to be called on a class-name!";
-  }
-  if (@_%2) {
-    croak "wrong number of args! ";
-  }
-  my %args = @_;
-  my ($can,$x,$y,$text,$font) = @args{qw/canvas x y text font/};
-  eval {$can->isa('Tk::Canvas');$can->Exists;};
-  croak "something is wrong with this 'canvas':<$can> $@" if $@;
-  my $text_id;
-  my @coords;
-  @coords= map {ref($_)?$$_:$_} ($x,$y);
-  eval{$text_id = $can->createText(@coords,
-				   -text => $text,
-          			   -tags =>['TextBoxText',
-					    'TextBox',
-					    'TextBoxBind']);
-     };
-  croak "could not create TextBox at coords <$x>,<$y>: $@" if $@;
-
-  if ($font){
-      eval { $can -> itemconfigure ($text_id, -font=>$font) };
-      croak "could not set Font <$font>: $@" if $@;
-  }
-
-  my $p = 3;
-  my @bbox =  $can->bbox($text_id);
-  @bbox = ($bbox[0] -$p,$bbox[1]-$p,$bbox[2]+$p,$bbox[3]+$p);
-  my $box_id  = $can->createRectangle(
-				      @bbox,
-				      -fill  => 'white',
-				      -tags=>['TextBoxBox',
+    my $class = shift;
+    if (ref $class) {
+	croak "new has to be called on a class-name!";
+    }
+    if (@_%2) {
+	croak "wrong number of args! ";
+    }
+    my %args = @_;
+    my ($can,$x,$y,$text,$font) = @args{qw/canvas x y text font/};
+    eval {$can->isa('Tk::Canvas');$can->Exists;};
+    croak "something is wrong with this 'canvas':<$can> $@" if $@;
+    my $text_id;
+    my @coords;
+    @coords= map {ref($_)?$$_:$_} ($x,$y);
+    my @font = (-font=>$font) if $font;
+    
+    eval{$text_id = $can->createText(@coords,
+				     -text => $text,
+				     @font,
+				     -tags =>['TextBoxText',
 					      'TextBox',
 					      'TextBoxBind']);
-  my $self  = {text_id    => $text_id,
-	       box_id     => $box_id,
-	       dependents => {},
-	       canvas     => $can,
- 	       };
-  bless $self , $class;
-  $self->_register_instance;
-  $self->_create_canvas_layers;
-  $self->_set_layer(2); 
-  $self->_set_canvas_bindings;
-  if (ref $x and ref $y){
-    $self->_tie_coords($x,$y);
-  }
-  $self;
+     };
+    croak "could not create TextBox at coords <$x>,<$y>: $@" if $@;
+
+    my $p = 3;
+    my @bbox =  $can->bbox($text_id);
+    @bbox = ($bbox[0] -$p,$bbox[1]-$p,$bbox[2]+$p,$bbox[3]+$p);
+    my $box_id  = $can->createRectangle(
+					@bbox,
+					-fill  => 'white',
+					-tags  =>['TextBoxBox',
+						  'TextBox',
+						  'TextBoxBind']);
+    my $self  = {text_id    => $text_id,
+		 box_id     => $box_id,
+		 dependents => {},
+		 canvas     => $can,
+	     };
+    bless $self , $class;
+    $self->_register_instance;
+    $self->_create_canvas_layers;
+    $self->_set_layer(2); 
+    $self->_set_canvas_bindings;
+    if (ref $x and ref $y) {
+	$self->_tie_coords($x,$y);
+    }
+    $self;
 
 }
 
@@ -365,36 +363,6 @@ sub _get_inst_by_id{
   return $obj_map->{$id}||undef;
 }
 
-package TiedCoord;
-use Scalar::Util(qw/weaken/);
-
-sub TIESCALAR{
-  my($class,$t_b,$c_in)=@_;
-  my $self =  bless{TextBox      =>$t_b,
-		    coord_index  =>$c_in},$class;
-  weaken ($self->{TextBox});
-  $self;
-}
-
-sub FETCH{
-  my $self = shift;
-  my $i = $self->{coord_index};
-  if ($self->{TextBox}){
-  return ($self->{TextBox}->get_coords)[$i];
-  }
-  return $self->{cached}[$i]||10;
-}
-
-sub STORE{
-  my ($self,$value) = @_;
-  my $i  = $self->{coord_index};
-  my $tb = $self->{TextBox};
-  $self->{cached}[$i]= $value;
-  return unless $tb;
-  my @coords = $tb->get_coords;
-  $coords[$i] = $value;
-  $tb->set_coords(@coords);
-}
 
 
 

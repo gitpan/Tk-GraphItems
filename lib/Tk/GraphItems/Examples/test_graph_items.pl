@@ -22,29 +22,32 @@ my @conn;
 my ($tx,$ty) = (100,100);
 my %command;
 $command{build_items}=sub{ 
-  my ($x,$y) = (50,20);
-  for my $n(0..4){$node[$n] = Tk::GraphItems::TextBox->new(canvas=>$can,
-							  text=>"object $n",
-							  'x'=>$x=($x%200)+40,
-							  'y'=>$y+=100);
-		}
-  ($tx,$ty)=(50,200);
-  $node[5] =  Tk::GraphItems::TextBox->new(canvas=>$can,
-					  text=>"object\ntied x_y",
-					  'x'=>\$tx,
-					  'y'=>\$ty);
-  for my $n(0..4){$conn[$n] = Tk::GraphItems::Connector->new(
-						 source=>$node[$n],
-						 target=>$node[($n+1)%5],
-						 colour =>'black'
-						);
+    my ($x,$y) = (50,20);
+    for my $n(0..4){
+	$node[$n] =Tk::GraphItems::TextBox->new(canvas => $can,
+						text   => "object $n",
+						'x'    => $x=($x%200)+40,
+						'y'    => $y+=100);
+    }
+    ($tx,$ty)=(50,200);
+    $node[5] =  Tk::GraphItems::TextBox->new(canvas=>$can,
+					     text  =>"object\ntied x_y",
+					     'x'=>\$tx,
+					     'y'=>\$ty);
+    for my $n(0..4){
+	$conn[$n] = Tk::GraphItems::Connector->new(
+						   source  =>$node[$n],
+						   target  =>$node[($n+1)%5],
+						   colour  =>'black',
+					       );
 		}
 
+    weaken $_ for(@conn) ;
 
- Tk::GraphItems::Connector->new(
-				source=>$node[5],
-				target=>$node[3],
-					   );
+    Tk::GraphItems::Connector->new(
+				   source=>$node[5],
+				   target=>$node[3],
+			       );
 
 
 };
@@ -83,9 +86,7 @@ $command{conn_width} = sub {
 $command{conn_colour} = sub {
   foreach(@conn){$_->colour($_->colour eq'red'?'black':'red')}
 };
-$command{'conn_free-loose_access'}=sub {
-  @conn = ();
-};
+
 my $frame = $mw->Frame()->pack(-side=>'left');
 my $prev;
 for (sort keys %command){

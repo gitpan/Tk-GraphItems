@@ -10,7 +10,7 @@ use warnings;
 use Carp;
 
 use 5.008001;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub add_dependent{
     my ($self,$dependent) = @_;
@@ -41,8 +41,8 @@ sub _set_layer{
 Canvas-item with id <$l_id> has been deleted by user.
 Be careful not to manipulate or delete Tk::GraphItems directly!" ;}
   $can->lower($_,$l_id)for $self->canvas_items;
-
 }
+
 sub _create_canvas_layers{
   my $self = shift;
   return if ($self->get_canvas)->{GraphItem_layers};
@@ -66,6 +66,30 @@ sub _register_instance{
      weaken ($obj_map->{$_});
   }
 }
+
+sub bind_class{
+    my ($self,$event,$tag,$code) = @_;
+    my $can = $self->{canvas};
+    if ($code){
+	$can->bind($tag,$event => sub {
+		       my($can) = @_;
+		       my $id= ($can->find(withtag => 'current'))[0];
+		       my $self = _get_inst_by_id($can,$id);
+		       $code->($self);
+		   });
+    }else{
+	$can->bind( $tag,$event,'');
+    }
+  
+}
+
+sub _get_inst_by_id{
+  my ($can,$id) = @_;
+  my $obj_map = $can->{GraphItemsMap};
+  return $obj_map->{$id}||undef;
+}
+
+
 
 sub DESTROY{
   my $self = shift;

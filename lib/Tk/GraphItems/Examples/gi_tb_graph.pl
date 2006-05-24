@@ -14,11 +14,11 @@ my $mw = tkinit();
 
 my $graph = Graph->new(refvertexed=>1);
 my $scrolled_can = $mw -> Scrolled('Canvas',
-				   -width=>500,
-				   -height=>500,
-				   -scrollregion=>[0,0,500,500],
-			       )->pack(-fill  =>'both',
-				       -expand=>1);
+				   -width        => 500,
+				   -height       => 500,
+				   -scrollregion => [0,0,500,500],
+			       )->pack(-fill   => 'both',
+				       -expand => 1);
 
 # for use with Tk::GraphItems we have to extract the
 # 'real' canvas out of the Scrolled widget :
@@ -27,8 +27,8 @@ my $can = $scrolled_can->Subwidget('scrolled');
 my $text =<<'TEXT'
 Mouse bindings are as follows:
 Shift-Button-1    create a new vertex here
-Button1-move      drag this vertex
 Shift-Button3     delete this vertex
+Button1-move      drag this vertex
 Control-Button1   select/unselect  this vertex
 Control-Button1   if another vertex is selected:
                   create an edge from the selected
@@ -104,7 +104,7 @@ sub new_node{
 
     my ( $can,$x,$y ) = @_;
     my $v = Tk::GraphItems::TextBox->new(canvas=>$can,
-					 text=>"n",
+					 text=>"node",
 				#	 font=> ['Courier',10],
 					 'x'=>$x,
 					 'y'=>$y);
