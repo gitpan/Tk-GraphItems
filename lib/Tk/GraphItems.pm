@@ -8,7 +8,7 @@ Tk::GraphItems - Display relation-graphs on a Tk::Canvas
 
 =head1 DESCRIPTION
 
-Tk::GraphItems provides objects TextBox and Connector to display nodes and edges of given relation-graph implementations on a Tk::Canvas widget.
+Tk::GraphItems provides objects TextBox, Circle and Connector to display nodes and edges of given relation-graph implementations on a Tk::Canvas widget.
 Tk::GraphItems contain a dependency mechanism to ensure, that  edges are updated on changes of position or size of their source- and target-nodes. Edges have view-properties like colour, width, direction(arrows). Nodes support (bg)colour and  text (can be multiline). Nodes can be moved and placed programmatically or with drag/drop. To make integration into existing graph-implementations easier, Tk::GraphItems contains a simple tie-module to tie the nodes coords-  getter-/setter - methods to given Variables in the underlying model. Bindings to Tk-Events can be set so it's easy to implement e.g. context-menus for the objects.
 
 
@@ -64,7 +64,7 @@ at your option, any later version of Perl 5 you may have available.
 
 =cut
 package Tk::GraphItems;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 require Tk::GraphItems::TextBox;
 require Tk::GraphItems::Circle;
 require Tk::GraphItems::Connector;

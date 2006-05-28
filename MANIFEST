@@ -2,11 +2,14 @@ Changes
 Makefile.PL
 MANIFEST
 README
-t/Tk-GraphItems.t
+t/Tk-GraphItems-Circle.t
+t/Tk-GraphItems-TextBox.t
+t/Tk-GraphItems-Tie.t
 lib/Tk/GraphItems.pm
 lib/Tk/GraphItems/TextBox.pm
 lib/Tk/GraphItems/Connector.pm
 lib/Tk/GraphItems/Circle.pm
+lib/Tk/GraphItems/Node.pm
 lib/Tk/GraphItems/GraphItem.pm
 lib/Tk/GraphItems/TiedCoord.pm
 lib/Tk/GraphItems/Examples/moving_items.pl

@@ -72,7 +72,7 @@ Sets the background to $a_Tk_colour, if the argument is given. Returns the curre
 
 =item B<bind_class(>'event',$coderefB<)>
 
-Binds the given event_sequence to $coderef. This binding will exist for all TextBox instances on the Canvas displaying the object, 'bind_class' was called with.The binding will not exist for TextBox-instances, that are displayed on other Canvas-instances.  The TextBox instance,  which is the 'current' one at the time the event is triggered, will be passed to $coderef as an argument.
+Binds the given 'event' sequence to $coderef. This binding will exist for all TextBox instances on the Canvas displaying the invoking object. The binding will not exist for TextBox items that are displayed on other Canvas instances. The TextBox instance which is the 'current' one at the time the event is triggered will be passed to $coderef as an argument. If $coderef contains an empty string, the binding for 'event' is deleted.
 
 =item B<was_dragged>
 
@@ -97,17 +97,16 @@ at your option, any later version of Perl 5 you may have available.
 
 =cut
 
-use 5.008001;
-our $VERSION = '0.05';
+use 5.008;
+our $VERSION = '0.06';
 
 #use Data::Dumper;
 use Carp;
 use warnings;
 use strict;
-use Scalar::Util (qw/looks_like_number/);
-require Tk::GraphItems::GraphItem;
+require Tk::GraphItems::Node;
 require Tk::GraphItems::TiedCoord;
-our @ISA = ('Tk::GraphItems::GraphItem','Tk::GraphItems::Node');
+our @ISA = ('Tk::GraphItems::Node');
 
 
 sub new{
@@ -162,211 +161,112 @@ sub new{
 
 }
 
-{
-my %iinfo = (-text=>1);		# item information hash
 
 sub _set_canvas_bindings{
-  my ($self) = @_;
-  my $can = $self->{canvas};
-  return if $can->{TextBoxBindings_done};
-  for my $tag (qw/TextBox /){
-    $can->bind($tag,'<1>' => sub {
-		 my($can) = @_;
-		 my $e = $can->XEvent;
-		 _items_start_drag ($can, $e->x, $e->y, \%iinfo);
-	       }
-	      );
-    $can->bind($tag,'<B1-Motion>' =>sub {
-		 _items_drag ($can,
-			     $Tk::event->x,
-			     $Tk::event->y,
-			     \%iinfo);
-	       }
-	      );
-  }
-  $can->{TextBoxBindings_done}= 1;
+    my ($self) = @_;
+    my $can = $self->{canvas};
+    return if $can->{TextBoxBindings_done};
+
+    $self->_set_canvas_bindings_for_tag('TextBox');
+
+    $can->{TextBoxBindings_done}= 1;
 }
-} #end scope of iinfo
+
 
 sub bind_class{
-  my ($self,$event,$code) = @_;
-  my $can = $self->{canvas};
-  for my $tag (qw/TextBoxBind/){
-    $can->bind($tag,$event => sub {
-		 my($can) = @_;
-		 my $id= ($can->find(withtag => 'current'))[0];
-		 my $self = _get_inst_by_id($can,$id);
-		 $code->($self);
-	       });
-  }
+    my ($self,$event,$code) = @_;
+    my $can = $self->{canvas};
+    $self->_bind_this_class($event,'TextBoxBind',$code);
 }
 
-
-sub _items_drag {
-    my($can, $x, $y, $iinfo) = @_;
-   # $x = $can->canvasx($x);
-   # $y = $can->canvasy($y);
-    my $id= ($can->find(withtag => 'current'))[0];
-    my $self = _get_inst_by_id($can,$id);
-    my ($d_x,$d_y) = ($x-$iinfo->{lastX},$y-$iinfo->{lastY});
-    $self->_move($d_x ,$d_y);
-    $self->{was_dragged}=1;
-
-    $iinfo->{lastX} = $x;
-    $iinfo->{lastY} = $y;
-
-} # end items_drag
-
-sub _items_start_drag {
-
-    my($can, $x, $y, $iinfo) = @_;
-    $iinfo->{lastX} = $x;
-    $iinfo->{lastY} = $y;
-    my $id= ($can->find(withtag => 'current'))[0];
-    my $self = _get_inst_by_id($can,$id);
-    $self->{was_dragged}=0;
-
-} # end items_start_drag
 sub canvas_items{
-  my $self = shift;
-  return (@$self{qw/ box_id text_id/});
+    my $self = shift;
+    return (@$self{qw/ box_id text_id/});
 }
 
 sub connector_coords{
-  my ($self,$dependent) = @_;
-  my ($x,$y) = $self->get_coords;
-  if (!defined $dependent){
+    my ($self,$dependent) = @_;
+    my ($x,$y) = $self->get_coords;
+    if (!defined $dependent){
+	return($x,$y);
+    }
+    my $where = $dependent->{master}{$self};
+    my $other = $where eq 'source'? 'target':'source';
+    my $c_c = $dependent->get_coords($other);
+    my @bbox = ($self->{canvas})->coords($self->{box_id});
+    my $height = $bbox[3]-$bbox[1];
+    my $width  = $bbox[2]-$bbox[0];
+    my $b_r = $height / $width;
+    my $c_r= ($c_c->[1]-$y)/(($c_c->[0]-$x)||0.01);
+    if (abs ($b_r) > abs ($c_r)) { #r or l
+	if ($c_c->[0] > $x) {	#right
+	    #print "right\n";
+	    $x = $bbox[2];
+	    $y = $y+($c_r * $width /2);
+	} else {		#left
+	    #print "left\n";
+	    $x = $bbox[0];
+	    $y = $y-($c_r * $width /2);
+	}
+    } else {			# b or t
+	if ($c_c->[1] < $y) {	#top
+	    #print "top\n";
+	    $y = $bbox[1];
+	    $x = $x-((1/($c_r||0.01))*$height /2);
+	} else {		#bottom
+	    #print "bottom\n";
+	    $y = $bbox[3];
+	    $x = $x+((1/($c_r||0.01))*$height /2);
+	}
+    }
     return($x,$y);
-  }
-  my $where = $dependent->{master}{$self};
-  my $other = $where eq 'source'? 'target':'source';
-  my $c_c = $dependent->get_coords($other);
-  my @bbox = ($self->{canvas})->coords($self->{box_id});
-  my $height = $bbox[3]-$bbox[1];
-  my $width  = $bbox[2]-$bbox[0];
-  my $b_r = $height / $width;
-  my $c_r= ($c_c->[1]-$y)/(($c_c->[0]-$x)||0.01);
-  if (abs ($b_r) > abs ($c_r)){#r or l
-    if ($c_c->[0] > $x){#right
-      #print "right\n";
-      $x = $bbox[2];
-      $y = $y+($c_r * $width /2);
-    }else{#left
-      #print "left\n";
-      $x = $bbox[0];
-      $y = $y-($c_r * $width /2);
-    }
-  }else{# b or t
-    if ($c_c->[1] < $y){#top
-      #print "top\n";
-      $y = $bbox[1];
-      $x = $x-((1/($c_r||0.01))*$height /2);
-    }else{#bottom
-      #print "bottom\n";
-      $y = $bbox[3];
-      $x = $x+((1/($c_r||0.01))*$height /2);
-    }
-  }
-  return($x,$y);
 
 }
-sub move{
-  my $self = shift;
-  looks_like_number($_)||
-    croak "method 'move' failed: args <$_[0]>,<$_[1]> have to be numbers!"
-      for(@_[0,1]);
-  $self->_move(@_);
-}
 
-sub _move{
-  my ($self,$d_x,$d_y) = @_;
-  my ($x,$y) = $self->get_coords;
-  $self->_set_coords($x+$d_x,$y+$d_y);
-}
-sub set_coords{
-  my $self = shift;
-  if (ref $_[0]&& ref$_[1]){
-    $self->_tie_coords(@_);
-    return;
-  }
-  looks_like_number($_)||
-    croak "method 'set_coords' failed: args <$_[0]>,<$_[1]> have to be numbers!"
-      for(@_[0,1]);
-  $self->_set_coords(@_);
-}
 sub _set_coords{
-  my ($self,$x,$y)=@_;
-  my ($can,$t_id,$b_id) = @$self{qw/canvas text_id box_id/};
-  my $p = 3;
-  $can->coords($t_id,$x,$y);
-  my @bbox =  $can->bbox($t_id);
-  @bbox = ($bbox[0] -$p,$bbox[1]-$p,$bbox[2]+$p,$bbox[3]+$p);
-  $can->coords($b_id,@bbox);
+    my ($self,$x,$y)=@_;
+    my ($can,$t_id,$b_id) = @$self{qw/canvas text_id box_id/};
+    my $p = 3;
+    $can->coords($t_id,$x,$y);
+    my @bbox =  $can->bbox($t_id);
+    @bbox = ($bbox[0] -$p,$bbox[1]-$p,$bbox[2]+$p,$bbox[3]+$p);
+    $can->coords($b_id,@bbox);
 
-  for ($self->dependents){
-    $_->position_changed($self);
-  }
+    for ($self->dependents) {
+	$_->position_changed($self);
+    }
 }
-sub _tie_coords{
-  my $self = shift;
-  $self ->_untie_coords;
-  tie ${$_[0]}, 'Tk::GraphItems::TiedCoord',$self,0 if ref $_[0];
-  tie ${$_[1]}, 'Tk::GraphItems::TiedCoord',$self,1 if ref $_[1];
-  @$self{qw/tiedx tiedy/}= @_[0,1];
-}
-sub _untie_coords{
-  my $self = shift;
-  for (@$self{qw/tiedx tiedy/}){
-    untie ${$_} ;#if tied $$_
-  }
-}
+
 sub text{
-  my $self = shift;
-  my $can = $self->get_canvas;
-  if (@_){
-    $can->itemconfigure($self->{text_id},-text=>$_[0]);
-    #call _set_coords to resize TextBox
-    $self->_set_coords($self->get_coords);
-    return $self;
-  }else{
-    return $can->itemcget($self->{text_id},'-text');
-  }
+    my $self = shift;
+    my $can = $self->get_canvas;
+    if (@_) {
+	$can->itemconfigure($self->{text_id},-text=>$_[0]);
+	#call _set_coords to resize TextBox
+	$self->_set_coords($self->get_coords);
+	return $self;
+    } else {
+	return $can->itemcget($self->{text_id},'-text');
+    }
 }
+
 sub colour{
-  my $self = shift;
-  my $can = $self->get_canvas;
-  if (@_){
-    eval{$can->itemconfigure($self->{box_id},-fill=>$_[0]);};
-      croak " setting colour to <$_[0]> not possible: $@" if $@;
-    return $self;
-  }else{
-    return $can->itemcget($self->{box_id},'-fill');
-  }
+    my $self = shift;
+    my $can = $self->get_canvas;
+    if (@_) {
+	eval{$can->itemconfigure($self->{box_id},-fill=>$_[0]);};
+	croak " setting colour to <$_[0]> not possible: $@" if $@;
+	return $self;
+    } else {
+	return $can->itemcget($self->{box_id},'-fill');
+    }
 }
 sub get_coords{
-  my$self = shift;
-  my $can = $self->get_canvas;
-  my @coords = $can->coords($self->{text_id});
-  return wantarray ? @coords:\@coords;
+    my$self = shift;
+    my $can = $self->get_canvas;
+    my @coords = $can->coords($self->{text_id});
+    return wantarray ? @coords:\@coords;
 }
-
-sub was_dragged{
-  my $self = shift;
-  return $self->{was_dragged} ||0;
-}
-
-
-
-sub _get_inst_by_id{
-  my ($can,$id) = @_;
-  my $obj_map = $can->{GraphItemsMap};
-  return $obj_map->{$id}||undef;
-}
-
-
-
-
-package Tk::GraphItems::Node;
 
 
 1;

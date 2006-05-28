@@ -63,6 +63,10 @@ Sets the style of the Connectors line-endings. Defaults to 'target'.
 
 Sets Connectors linewidth in pixels. Defaults to 1.
 
+=item B<bind_class(>'event',$coderefB<)>
+
+Binds the given 'event' sequence to $coderef. This binding will exist for all Connector instances on the Canvas displaying the invoking object. The binding will not exist for Connectors that are displayed on other Canvas instances. The Connector instance which is the 'current' one at the time the event is triggered will be passed to $coderef as an argument. If $coderef contains an empty string, the binding for 'event' is deleted.
+
 =item B<detach>
 
 Detach the Connector instance from its source and target so it can be DESTROYED. - It will however stay 'alive' as long as you hold any references to it. If you do not hold a reference to 'Connector' (you don't have to, unless you want to change it's properties...), it will be DESTROYED when either of its 'source'- or 'target'-nodes is destroyed.
@@ -83,11 +87,9 @@ it under the same terms as Perl itself, either Perl version 5.8.7 or,
 at your option, any later version of Perl 5 you may have available.
 
 
-
-
 =cut
-use 5.008001;
-our $VERSION = '0.05';
+use 5.008;
+our $VERSION = '0.06';
 
 use Scalar::Util qw(weaken);
 #use Data::Dumper;
@@ -107,165 +109,176 @@ my %arrow=(source=>'first',
 	   none  =>'none',
 	   0     =>'none');
 sub new{
-  my $class= shift;
-  if (@_%2) {
-    croak "wrong number of args! ";
-  }
-  my %args = @_;
-  my ($source,$target,$colour,$width,$arrow_type,$autodestroy) = 
-    @args{qw/source target colour width arrow autodestroy/};
-  $arrow_type ||= 'target';
-  for (qw/source target/){
-    my $node = $args{$_};
-    eval{$node->isa('Tk::GraphItems::Node')}
-      ||croak " argument '$_': <$node> is no valid GraphItem::Node! $@ ";};
-  my $can =$source->get_canvas ;
-  if ($can ne $target->get_canvas){
-    croak "Can't connect Nodes on different Canvases!";
-  }
+    my $class= shift;
+    if (@_%2) {
+	croak "wrong number of args! ";
+    }
+    my %args = @_;
+    my ($source,$target,$colour,$width,$arrow_type,$autodestroy) = 
+	@args{qw/source target colour width arrow autodestroy/};
+    $arrow_type ||= 'target';
+    for (qw/source target/) {
+	my $node = $args{$_};
+	eval{$node->isa('Tk::GraphItems::Node')}
+	    ||croak " argument '$_': <$node> is no valid GraphItem::Node! $@ ";
+    }
+    ;
+    my $can =$source->get_canvas ;
+    if ($can ne $target->get_canvas) {
+	croak "Can't connect Nodes on different Canvases!";
+    }
 
-  my @coords ;
-  for ($source, $target){push @coords, $_->connector_coords()};
+    my @coords ;
+    for ($source, $target) {
+	push @coords, $_->connector_coords();
+    }
+    ;
 
-  my $id = eval{$can->createLine(@coords,
-				 -fill      => $colour||'black',
-				 -width     => $width||1,
-				 -tags      =>['GraphEdge',
-					       'GraphEdgeLine'],
-				 -arrow     =>$arrow{$arrow_type}||'last',
-				 -arrowshape=>[7,9,3],
-				)};
-  if ($@){
-    croak "Connector creation failed: $@";
-  }
+    my $id = eval{$can->createLine(@coords,
+				   -fill      => $colour||'black',
+				   -width     => $width||1,
+				   -tags      =>[
+						 'ConnectorBind'],
+				   -arrow     =>$arrow{$arrow_type}||'last',
+				   -arrowshape=>[7,9,3],
+			       )};
+    if ($@) {
+	croak "Connector creation failed: $@";
+    }
 
 
-  my $self  = {line_id     => $id,
-	       dependents  => {},
-	       canvas      => $can,
-	       source      => $source,
-	       target      => $target,
-	       autodestroy => $autodestroy ||= 0};
-  bless $self , $class;
-  $self->_register_instance;
-  $self->_set_layer(0);
-  for (qw/source target/){
-      if ($autodestroy){
-	  $self->{$_}->add_dependent_weak($self);
-      }else{
-	  $self->{$_}->add_dependent($self);
-      }
-      $self->set_master($_,$self->{$_});
-      weaken($self->{$_});}
-  for (qw/source target/){
-    $self->set_coords($_,$self->{$_}->connector_coords($self))
-  };
-  $self;
+    my $self  = {line_id     => $id,
+		 dependents  => {},
+		 canvas      => $can,
+		 source      => $source,
+		 target      => $target,
+		 autodestroy => $autodestroy ||= 0};
+    bless $self , $class;
+    $self->_register_instance;
+    $self->_set_layer(0);
+    for (qw/source target/) {
+	if ($autodestroy) {
+	    $self->{$_}->add_dependent_weak($self);
+	} else {
+	    $self->{$_}->add_dependent($self);
+	}
+	$self->set_master($_,$self->{$_});
+	weaken($self->{$_});
+    }
+    for (qw/source target/) {
+	$self->set_coords($_,$self->{$_}->connector_coords($self))
+    }
+    ;
+    $self;
 }
 
 
 sub canvas_items{
-  my $self = shift;
-  return ($self->{line_id});
+    my $self = shift;
+    return ($self->{line_id});
 }
 
 sub destroy_myself{
-  my $self = shift;
-  $self->detach;
+    my $self = shift;
+    $self->detach;
 }
 sub detach{
-  my $self = shift;
-  for (@$self{qw/source target/}){
-    if (UNIVERSAL::can($_ , 'remove_dependent')){
-     # print"d_f_m $_\n";
-      $_->remove_dependent($self);
+    my $self = shift;
+    for (@$self{qw/source target/}) {
+	if (UNIVERSAL::can($_ , 'remove_dependent')) {
+	    # print"d_f_m $_\n";
+	    $_->remove_dependent($self);
+	}
     }
-  }
 }
-sub _move{
-  my ($self,$where,$d_x,$d_y) = @_;
-  if ($where !~ /source|target/){
-    return;
-  }
-  $self->set_coords($self->{$where.'_x'}+$d_x,$self->{$where.'_y'}+$d_y);
-}
+
 sub get_coords{
-  my ($self,$where) = @_;
-  my ($can,$id) = @$self{qw/canvas line_id/};
-  my @coords = $can->coords($id);
-  if (($where||'') eq 'source'){splice (@coords,-2)}
-  if (($where||'') eq 'target'){splice (@coords,0,2)}
-  return wantarray ? @coords : \@coords;
+    my ($self,$where) = @_;
+    my ($can,$id) = @$self{qw/canvas line_id/};
+    my @coords = $can->coords($id);
+    if (($where||'') eq 'source') {
+	splice (@coords,-2);
+    }
+    if (($where||'') eq 'target') {
+	splice (@coords,0,2);
+    }
+    return wantarray ? @coords : \@coords;
 }
 
 sub set_coords{
-  my ($self,$where,$x,$y)=@_;
-  my ($can,$l_id) = @$self{qw/canvas line_id/};
-  if ($where !~ /source|target/){
-    return;
-  }
-  my @coords = $can->coords($l_id);
-  if ($where eq 'source'){
-    @coords[0,1] = ($x,$y);
-  }
-  else{
-    @coords[2,3] = ($x,$y);
-  }
-  $can->coords($l_id,@coords);
+    my ($self,$where,$x,$y)=@_;
+    my ($can,$l_id) = @$self{qw/canvas line_id/};
+    if ($where !~ /source|target/) {
+	return;
+    }
+    my @coords = $can->coords($l_id);
+    if ($where eq 'source') {
+	@coords[0,1] = ($x,$y);
+    } else {
+	@coords[2,3] = ($x,$y);
+    }
+    $can->coords($l_id,@coords);
 }
 
 sub set_master{
-  my ($self,$where,$master) = @_;
-  return unless $where =~ /source|target/;
-  $self->{master}{$master}=$where;
+    my ($self,$where,$master) = @_;
+    return unless $where =~ /source|target/;
+    $self->{master}{$master}=$where;
 }
 
 sub colour{
-  my $self = shift;
-  my $can = $self->get_canvas;
-  if (@_){
-    eval{$can->itemconfigure($self->{line_id},-fill=>$_[0]);};
-      croak " setting colour to <$_[0]> not possible: $@" if $@;
-    return $self;
-  }else{
-    return $can->itemcget($self->{line_id},'-fill');
-  }
+    my $self = shift;
+    my $can = $self->get_canvas;
+    if (@_) {
+	eval{$can->itemconfigure($self->{line_id},-fill=>$_[0]);};
+	croak " setting colour to <$_[0]> not possible: $@" if $@;
+	return $self;
+    } else {
+	return $can->itemcget($self->{line_id},'-fill');
+    }
 }
 sub arrow{
-  my ($self,$arr_type) = @_;
-  my $can = $self->get_canvas;
-  $can->itemconfigure($self->{line_id},-arrow=>$arrow{$arr_type}||'last');
-  $self;
+    my ($self,$arr_type) = @_;
+    if ( ! $arrow{$arr_type}) {
+	croak " setting arrow to <$arr_type> not possible.\n"
+	    ."Arrow type must be one of \n"
+		.join ("\n",keys %arrow)
+		    ."\n$@";
+    }
+    my $can = $self->get_canvas;
+    $can->itemconfigure($self->{line_id},-arrow=>$arrow{$arr_type}||'last');
+    $self;
 }
 sub width{
-  my $self = shift;
-  my $can = $self->get_canvas;
-  if (@_){
-    eval{$can->itemconfigure($self->{line_id},-width=>$_[0]);};
-      croak " setting width to <$_[0]> not possible: $@" if $@;
-    return $self;
-  }else{
-    return $can->itemcget($self->{line_id},'-width');
-  }
+    my $self = shift;
+    my $can = $self->get_canvas;
+    if (@_) {
+	eval{$can->itemconfigure($self->{line_id},-width=>$_[0]);};
+	croak " setting width to <$_[0]> not possible: $@" if $@;
+	return $self;
+    } else {
+	return $can->itemcget($self->{line_id},'-width');
+    }
 }
 sub position_changed{
-  my ($self,$master) = @_;
-  my  $first = $self->{master}{$master};
-  my  $second= $first eq 'source'?'target':'source';
-  for my $where ($first,$second){
-    $master = $self->{$where};
-    my ($x,$y) = $master->connector_coords($self);
-    $self->set_coords($where,$x,$y);
-  }
+    my ($self,$master) = @_;
+    my  $first = $self->{master}{$master};
+    my  $second= $first eq 'source'?'target':'source';
+    for my $where ($first,$second) {
+	$master = $self->{$where};
+	my ($x,$y) = $master->connector_coords($self);
+	$self->set_coords($where,$x,$y);
+    }
+}
+
+sub bind_class{
+    my ($self,$event,$code) = @_;
+    my $can = $self->{canvas};
+    $self->_bind_this_class($event,'ConnectorBind',$code);
 }
 
 
 
-sub _get_inst_by_id{
-  my ($can,$id) = @_;
-  my $obj_map = $can->{GraphItemsMap};
-  return $obj_map->{$id}||undef;
-}
 
 sub DESTROY {
     my $self = shift;

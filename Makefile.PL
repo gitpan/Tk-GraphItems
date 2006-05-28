@@ -1,11 +1,12 @@
-use 5.008001;
+use 5.008;
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
     NAME              => 'Tk::GraphItems',
     VERSION_FROM      => 'lib/Tk/GraphItems.pm', # finds $VERSION
-    PREREQ_PM         => {Tk=> 8.4}, 
+    PREREQ_PM         => {Tk=> 8.4,
+		          Scalar::Util => 1.10}, 
     ABSTRACT_FROM  => 'lib/Tk/GraphItems.pm', # retrieve abstract from module
     AUTHOR         => 'Ch.Lamprecht <ch.l.ngre@online.de>',
 	     );

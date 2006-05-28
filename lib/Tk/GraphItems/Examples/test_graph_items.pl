@@ -48,9 +48,14 @@ $command{build_items}=sub{
 				   source=>$node[5],
 				   target=>$node[3],
 			       );
-
+    $conn[0]->bind_class('<3>',sub{my $col = $_[0]->colour;
+				   $col = $col eq 'red' ? 'black':'red';
+				   $_[0]->colour($col);
+			       }
+		     );
 
 };
+
 $command{nodes_move}= sub{
   for (1..2){$node[$_]->move(20,5)};
   $_ += 10 for ($tx,$ty);

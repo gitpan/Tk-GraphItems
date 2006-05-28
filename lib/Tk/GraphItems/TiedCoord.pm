@@ -5,33 +5,34 @@
 
 package Tk::GraphItems::TiedCoord;
 use Scalar::Util(qw/weaken/);
-our $VERSION = 0.05;
+our $VERSION = 0.06;
+
 sub TIESCALAR{
-  my($class,$t_b,$c_in)=@_;
-  my $self =  bless{TkGNode      =>$t_b,
-		    coord_index  =>$c_in},$class;
-  weaken ($self->{TkGNode});
-  $self;
+    my($class,$t_b,$c_in)=@_;
+    my $self =  bless{TkGNode      =>$t_b,
+		      coord_index  =>$c_in},$class;
+    weaken ($self->{TkGNode});
+    $self;
 }
 
 sub FETCH{
-  my $self = shift;
-  my $i = $self->{coord_index};
-  if ($self->{TkGNode}){
-  return ($self->{TkGNode}->get_coords)[$i];
-  }
-  return $self->{cached}[$i]||0;
+    my $self = shift;
+    my $i = $self->{coord_index};
+    if ($self->{TkGNode}) {
+	return ($self->{TkGNode}->get_coords)[$i];
+    }
+    return $self->{cached}[$i]||0;
 }
 
 sub STORE{
-  my ($self,$value) = @_;
-  my $i  = $self->{coord_index};
-  my $tb = $self->{TkGNode};
-  $self->{cached}[$i]= $value;
-  return unless $tb;
-  my @coords = $tb->get_coords;
-  $coords[$i] = $value;
-  $tb->set_coords(@coords);
+    my ($self,$value) = @_;
+    my $i  = $self->{coord_index};
+    my $tb = $self->{TkGNode};
+    $self->{cached}[$i]= $value;
+    return unless $tb;
+    my @coords = $tb->get_coords;
+    $coords[$i] = $value;
+    $tb->set_coords(@coords);
 }
 1;
 
