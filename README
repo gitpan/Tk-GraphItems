@@ -1,4 +1,4 @@
-Tk-GraphItems version 0.05
+Tk-GraphItems version 0.07
 ==========================
 
 Display graphical representations of relation-graphs on a Tk::Canvas-widget.

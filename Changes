@@ -1,5 +1,7 @@
 Revision history for Perl extension Tk::GraphItems.
 
+0.07  Changed Makefile to require Tk 804.027
+
 0.06  2006-05-29
       Moved functionality to Node.pm - parent class of TextBox and Circle
       Added tests for Circle- and Tie- classes 
