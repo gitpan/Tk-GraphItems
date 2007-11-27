@@ -64,7 +64,7 @@ at your option, any later version of Perl 5 you may have available.
 
 =cut
 package Tk::GraphItems;
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 require Tk::GraphItems::TextBox;
 require Tk::GraphItems::Circle;
 require Tk::GraphItems::Connector;

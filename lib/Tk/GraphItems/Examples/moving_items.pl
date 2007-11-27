@@ -6,7 +6,6 @@ use Data::Dumper;
 use Scalar::Util qw/ weaken /;
 #require Tk::GraphItems::TextBox;
 #require Tk::GraphItems::Connector;
-use Devel::Leak;
 require Tk::GraphItems;
 my $mw = tkinit();
 my$text;

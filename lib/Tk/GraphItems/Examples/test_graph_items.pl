@@ -5,7 +5,6 @@ use Tk;
 use Data::Dumper;
 require Tk::GraphItems::TextBox;
 require Tk::GraphItems::Connector;
-use Devel::Leak;
 
 my $mw = tkinit();
 my$text;

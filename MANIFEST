@@ -5,6 +5,8 @@ README
 t/Tk-GraphItems-Circle.t
 t/Tk-GraphItems-TextBox.t
 t/Tk-GraphItems-Tie.t
+t/Tk-GraphItems.t
+t/Tk-GraphItems_more.t
 lib/Tk/GraphItems.pm
 lib/Tk/GraphItems/TextBox.pm
 lib/Tk/GraphItems/Connector.pm
