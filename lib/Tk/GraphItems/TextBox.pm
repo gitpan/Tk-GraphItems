@@ -98,7 +98,7 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 use 5.008;
-our $VERSION = '0.06';
+our $VERSION = '0.09';
 
 #use Data::Dumper;
 use Carp;
@@ -119,8 +119,9 @@ sub new{
     }
     my %args = @_;
     my ($can,$x,$y,$text,$font) = @args{qw/canvas x y text font/};
-    eval {$can->isa('Tk::Canvas');$can->Exists;};
-    croak "something is wrong with this 'canvas':<$can> $@" if $@;
+    eval {$can->isa('Tk::Canvas')};
+    croak "this is not a 'Canvas':<$can> $@" if $@;
+    unless ($can->Exists){croak "This Canvas does not Exist:<$can>"};
     my $text_id;
     my @coords;
     @coords= map {ref($_)?$$_:$_} ($x,$y);

@@ -64,7 +64,7 @@ at your option, any later version of Perl 5 you may have available.
 
 =cut
 package Tk::GraphItems;
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 require Tk::GraphItems::TextBox;
 require Tk::GraphItems::Circle;
 require Tk::GraphItems::Connector;
@@ -72,7 +72,7 @@ require Tk::GraphItems::Connector;
 sub TextBox{
     if ($_[0]){
         shift;
-        return Tk::GraphItems::TextBox->new(@_);
+        return 'Tk::GraphItems::TextBox'->new(@_);
     }
     return 'Tk::GraphItems::TextBox';
 }
@@ -80,14 +80,14 @@ sub TextBox{
 sub Connector{
     if ($_[0]){
         shift;
-        return Tk::GraphItems::Connector->new(@_);
+        return 'Tk::GraphItems::Connector'->new(@_);
     }
     return 'Tk::GraphItems::Connector';
 }
 sub Circle{
     if ($_[0]){
         shift;
-        return Tk::GraphItems::Circle->new(@_);
+        return 'Tk::GraphItems::Circle'->new(@_);
     }
     return 'Tk::GraphItems::Circle';
 }
