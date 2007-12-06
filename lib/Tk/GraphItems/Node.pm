@@ -1,7 +1,7 @@
 package Tk::GraphItems::Node;
 
 
-# Copyright (C) 2006 by Christoph Lamprecht
+# Copyright (C) 2007 by Christoph Lamprecht
 
 # This library is free software; you can redistribute it and/or modify
 # it under the same terms as Perl itself, either Perl version 5.8.7 or,
@@ -10,7 +10,7 @@ package Tk::GraphItems::Node;
 
 
 use 5.008;
-our $VERSION = '0.06';
+our $VERSION = '0.11';
 
 #use Data::Dumper;
 use Carp;

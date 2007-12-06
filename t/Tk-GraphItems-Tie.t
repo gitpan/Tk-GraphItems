@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl Tk-GraphItems-Tie.t'
 
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 BEGIN {use_ok ('Tk')};
 require_ok ('Tk::GraphItems::Circle');
 require_ok ('Tk::GraphItems::TextBox');
@@ -53,9 +53,20 @@ sub set_c{
   #  $mw->update;
     my ($x,$y) =  $obj[1]->get_coords;
     print "<$x>,<$y>\n";
-    die unless $x - 50 < 0.01 and $y - 30 < 0.01;
+    die if abs ( $x - 50 ) > 0.01 or abs( $y - 30 ) > 0.01;
 }
 
+sub set_tied_coords{
+    my $x = 0;
+    my $y = 0;
+    $obj[1]->set_coords( \$x, \$y );
+    ( $x , $y ) = ( 25, 25 );
+    my @coords = $obj[1]->get_coords;
+    for (@coords){
+        die if abs( $_ - 25 ) > 0.01;
+    }
+
+}
 
 
 $mw->update;
@@ -69,6 +80,10 @@ $mw->update;
 
 eval{set_c()};
 ok( !$@,"method set_coords $@");
+$mw->update;
+
+eval{set_tied_coords()};
+ok( !$@,"method set_tied_coords $@");
 $mw->update;
 
 eval{und()};

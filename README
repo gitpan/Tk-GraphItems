@@ -1,4 +1,4 @@
-Tk-GraphItems version 0.07
+Tk-GraphItems version 0.11
 ==========================
 
 Display graphical representations of relation-graphs on a Tk::Canvas-widget.
@@ -29,7 +29,7 @@ This module requires Tk;
 COPYRIGHT AND LICENCE
 
 
-Copyright (C) 2006 by Ch. Lamprecht
+Copyright (C) 2006-2007 by Ch. Lamprecht
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.1 or,

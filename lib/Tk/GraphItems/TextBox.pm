@@ -11,15 +11,15 @@ Tk::GraphItems::TextBox - Display nodes of relation-graphs on a Tk::Canvas
   require Tk::GraphItems::TextBox;
   require Tk::GraphItems::Connector;
   ...
-  my $node = Tk::GraphItems::TextBox->new(canvas=> $can,
-					  text  => "new_node",
-                                          font  => ['Courier',8],
-					  'x'   => 50,
-				       	  'y'   => 50);
-  $node->move(10,0);
-  $node->set_coords(50,50);
-  $node->text($node->text()."\nanother_line");
-  $node->colour('red');
+  my $node = Tk::GraphItems::TextBox->new( canvas=> $can,
+					   text  => "new_node",
+                                           font  => ['Courier',8],
+					   x   => 50,
+				       	   y   => 50 );
+  $node->move( 10, 0 );
+  $node->set_coords( 50, 50 );
+  $node->text( $node->text()."\nanother_line" );
+  $node->colour( 'red' );
 
 
 
@@ -30,26 +30,21 @@ Tk::GraphItems::TextBox - Display nodes of relation-graphs on a Tk::Canvas
 
 Tk::GraphItems::TextBox provides objects to display nodes of relation-graphs on a Tk::Canvas widget.
 
-=head1 SEE ALSO
-
-Documentation of Tk::GraphItems::Connector.
-Examples in Tk/GraphItems/Examples.
-
 =head1 METHODS
 
 B<Tk::GraphItems::TextBox> supports the following methods:
 
 =over 4
 
-=item B<new(>canvas=> $a_canvas,
+=item B<new(> canvas=> $a_canvas,
              x     => $x_coord,
              y     => $y_coord,
              text  => $textB,
-             font  => $aTkFont<)>
+             font  => $aTkFont B<)>
 
 Return a new TextBox instance and display it on the given 'Canvas'. The canvas-items will be destroyed with the TextBox-instance when it goes out of scope.
 
-=item B<set_coords(>$x,$yB<)>
+=item B<set_coords(> $x, $y B<)>
 
 Set the (center)coordinates of this node.
 If two references are given as argumnents, the referenced Scalar-variables will get tied to the coordinates properties of the node.
@@ -58,19 +53,19 @@ If two references are given as argumnents, the referenced Scalar-variables will 
 
 Return the (center)coordinates of this node.
 
-=item B<move(>$d_x,$d_yB<)>
+=item B<move(> $d_x, $d_y B<)>
 
-Move the node by ($d_x,$d_y) pixels.
+Move the node by ( $d_x, $d_y ) points.
 
-=item B<text(>[$a_string]B<)>
+=item B<text(> [$a_string] B<)>
 
 Sets the displayed text to $a_string, if the argument is given. Returns the current text, if called without an argument.
 
-=item B<colour(>[$a_Tk_colour]B<)>
+=item B<colour(> [$a_Tk_colour] B<)>
 
 Sets the background to $a_Tk_colour, if the argument is given. Returns the current colour, if called without an argument.
 
-=item B<bind_class(>'event',$coderefB<)>
+=item B<bind_class(> 'event', $coderef B<)>
 
 Binds the given 'event' sequence to $coderef. This binding will exist for all TextBox instances on the Canvas displaying the invoking object. The binding will not exist for TextBox items that are displayed on other Canvas instances. The TextBox instance which is the 'current' one at the time the event is triggered will be passed to $coderef as an argument. If $coderef contains an empty string, the binding for 'event' is deleted.
 
@@ -80,13 +75,18 @@ Returns a true value in case a <B1-Motion> occured after the last <B1>. You may 
 
 =back
 
+=head1 SEE ALSO
+
+Documentation of Tk::GraphItems::Connector.
+Examples in Tk/GraphItems/Examples.
+
 =head1 AUTHOR
 
 Christoph Lamprecht, ch.l.ngre@online.de
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Christoph Lamprecht
+Copyright (C) 2007 by Christoph Lamprecht
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.7 or,
@@ -98,7 +98,7 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 use 5.008;
-our $VERSION = '0.09';
+our $VERSION = '0.11';
 
 #use Data::Dumper;
 use Carp;

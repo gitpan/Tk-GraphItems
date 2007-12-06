@@ -1,11 +1,13 @@
-# Copyright (c) 2006 by Christoph Lamprecht. All rights reserved.
+# Copyright (c) 2007 by Christoph Lamprecht. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 # ch.l.ngre@online.de
 
 package Tk::GraphItems::TiedCoord;
+use strict;
+use warnings;
 use Scalar::Util(qw/weaken/);
-our $VERSION = 0.06;
+our $VERSION = '0.11';
 
 sub TIESCALAR{
     my($class,$t_b,$c_in)=@_;

@@ -3,7 +3,7 @@
 # `perl Tk-GraphItems-TextBox.t'.
 
 
-use Test::More tests => 11;
+use Test::More tests => 34;
 
 BEGIN {use_ok ('Tk')};
 require_ok ('Tk::GraphItems::TextBox');
@@ -19,97 +19,217 @@ my $s_can = $mw -> Scrolled('Canvas',
 				-expand=>1);
 my $can = $s_can->Subwidget('scrolled');
 
-my @obj;
+my @node;
 my $conn;
+my $conn_weak;
 sub create{ 
     my ($x,$y) = (50,20);
-    for my $n (1..5) {
-	$obj[$n] = Tk::GraphItems::TextBox->new(canvas=>$can,
+    for my $n (0..1) {
+	$node[$n] = Tk::GraphItems::TextBox->new(canvas=>$can,
 						text=>"object $n",
-						'x'=>$x=($x%200)+40,
-						'y'=>$y+=100);
+						'x'=>$x+=20,
+						'y'=>$y+=20);
     }
-    for my $n (1..5) {
-	Tk::GraphItems::Connector->new(
-				       source=>$obj[$n],
-				       target=>$obj[($n%5)+1],
-				       colour =>'red',
-				   );
-    }
+
 
 
     $conn= Tk::GraphItems::Connector->new(
-					  source=>$obj[5],
-					  target=>$obj[3],
+					  source=>$node[0],
+					  target=>$node[1],
+				      );
+    $conn_weak = Tk::GraphItems::Connector->new(
+					  source      => $node[1],
+					  target      => $node[0],
+                                          autodestroy => 1,
 				      );
 
+}
 
+
+sub get_set_c{
+    my($x,$y) = @_;
+    if (@_){
+        $node[1]->set_coords($x,$y);
+    }
+    return $node[1]->get_coords;
 }
+
 sub move{
-    for (1..2) {
-	$obj[$_]->move(20,0);
-    }
+    my @delta = @_;
+    $node[1]->move(@delta);
+    return $node[1]->get_coords;
 }
-sub und{
-    my $item = pop(@obj);
-    undef ($item);
-}
-sub set_c{
-    $obj[1]->set_coords(40,20);
-}
+
+
 sub set_text{
-    for my $n (2..4) {
-	my $node = $obj[$n];
-	$node->text($node->text . "\nand more");
+    my $text = shift;
+    my $node = $node[0];
+    if (defined $text){
+        $node->text($text);
     }
+    $mw->update;
+    return $node->text;
 }
-sub set_colour{
-    for my $n (1..3) {
-	my $node = $obj[$n];
-	$node->colour($node->colour eq 'red'? 'white':'red');
-    }
+
+sub set_color{
+    my $color = shift;
+    $node[0]->colour($color);
+    return $node[0]->colour;
 }
+
+
 
 sub conn_arrow{
-    $conn->arrow('both');
+    my $arrow = shift;
+    if ($arrow){
+        $conn->arrow($arrow);
+    }
+    return $conn->arrow;
 }
 
-sub conn_colour{
-    $conn->colour('red');
-    die if (! $conn->colour eq 'red');
+sub conn_color{
+    my $color = shift;
+    $conn->colour($color);
+    return $conn->colour;
+}
+
+sub conn_width{
+    my $width = shift;
+    $conn->width($width);
+    return $conn->width;
 }
 
 $mw->update;
+
 eval{create()};
 ok( !$@,"instantiation $@");
+ok($node[0]->isa('Tk::GraphItems::TextBox'), 'node 1');
+ok($node[1]->isa('Tk::GraphItems::TextBox'), 'node 2');
+ok($conn->isa('Tk::GraphItems::Connector'), 'connector');
 $mw->update;
 
-eval{move()};
-ok( !$@,"method move $@");
+
 $mw->update;
+{
+    my @coords = (42,42);
+    my $ret;
+    eval{$ret = get_set_c(@coords)};
+    ok( !$@,"method get_set_coords $@");
+    is_deeply($ret, \@coords, 'get_set_coords result_ok');
+    eval{$ret = get_set_c(1,'foo')};
+    ok( $@," invalid args to set_coords(): $@");
+}
 
 
-eval{set_c()};
-ok( !$@,"method set_coords $@");
 $mw->update;
 
-eval{set_colour()};
-ok( !$@,"method set_colour $@");
+{
+    my @delta = (10,10);
+    my $ret ;
+    eval{
+        get_set_c(90,90);
+        move(@delta);
+        $ret = get_set_c();
+    };
+    ok( !$@,"method move $@");
+    is_deeply($ret,[100,100], 'move result_ok');
+    eval{
+        move('foo','bar');
+    };
+    ok($@, " invalid args to move(): $@");
+}
 $mw->update;
 
-eval{set_text()};
-ok( !$@,"set_text $@");
+{
+    my $color = 'red';
+    my $ret;
+    eval{$ret = set_color($color)};
+    ok( !$@, "method color $@");
+    is($ret, $color, 'color set correctly');
+    $color = 'foo';
+    eval{$ret = set_color($color)};
+    ok( $@, "invalid args to TextBox->colour $@");
+    $mw->update;
+}
+$mw->update;
+{
+    my $text = 'new text';
+    my $ret;
+    eval{$ret = set_text($text)};
+    ok( !$@, "method set_text $@");
+    is($ret, $text, 'text set correctly');
+    $mw->update;
+}
+
+{
+    my $color = 'red';
+    my $ret;
+    eval{$ret = conn_color($color)};
+    ok( !$@, "method Connector->color $@");
+    is($ret, $color, 'color set correctly');
+    $color = 'foo';
+    eval{$ret = conn_color($color)};
+    ok( $@, "invalid args to Connector->color $@");
+    $mw->update;
+}
+
+
+
+{
+    my $arrow = 'last';
+    my $ret;
+    eval{$ret = conn_arrow($arrow)};
+    ok( !$@,"connector arrow $@");
+    is($ret, $arrow, 'arrow set correctly');
+    $arrow = 'zzz';
+    eval{$ret = conn_arrow($arrow)};
+    ok( $@,"invalid args to connector->arrow $@");
+}
+    $mw->update;
+
+
+{
+    my $width = 3;
+    my $ret;
+    eval{$ret = conn_width($width)};
+    ok(!$@, 'connector width');
+    is($ret, $width, 'connector->width set correctly');
+    $width = 'foo';
+    eval{$ret = conn_width($width)};
+    ok($@, "invalid args to connector->width(): $@");
+
+}
+
 $mw->update;
 
-eval{conn_colour()};
-ok( !$@,"connector colour $@");
-$mw->update;
+$node[0]->bind_class('<<TestEvent>>', sub{});
+my $ret = $can->bind('TextBoxBind','<<TestEvent>>');
+is (substr("$ret",0,12),'Tk::Callback','TextBox binding created');
+$node[0]->bind_class('<<TestEvent>>', '');
+$ret = $can->bind('TextBoxBind','<<TestEvent>>');
+is ($ret,undef,'TextBox binding deleted');
 
-eval{conn_arrow()};
-ok( !$@,"connector arrow $@");
-$mw->update;
 
-eval{und()};
-ok( !$@,"undef last $@");
-$mw->update;
+$conn->bind_class('<<TestEvent>>', sub{});
+$ret = $can->bind('ConnectorBind','<<TestEvent>>');
+is (substr("$ret",0,12),'Tk::Callback','Connector binding created');
+$conn->bind_class('<<TestEvent>>', '');
+$ret = $can->bind('ConnectorBind','<<TestEvent>>');
+is ($ret,undef,'Connector binding deleted');
+
+my $canvas_item = $conn_weak->canvas_items;
+my $found = $can->find('withtag',$canvas_item);
+is ($found->[0], $canvas_item, 'Connector CanvasItem exists');
+undef $conn_weak;
+$found = $can->find('withtag',$canvas_item);
+isnt ($found, $canvas_item, 'Connector CanvasItem destroyed');
+
+
+
+
+$node[0] = $node[1] = $conn=  undef;
+
+my @items = $can->find('all');
+is( @items, 3, 'Canvas items destroyed');
+
 __END__

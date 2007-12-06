@@ -1,5 +1,8 @@
 Revision history for Perl extension Tk::GraphItems.
 
+0.11  More and better tests 
+      Better examples
+
 0.10  More Tests
 
 0.08  Fixed a bug in Tk::GraphItems caused by 

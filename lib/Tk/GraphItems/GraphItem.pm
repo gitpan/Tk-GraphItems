@@ -1,4 +1,4 @@
-# Copyright (c) 2006 by Christoph Lamprecht. All rights reserved.
+# Copyright (c) 2007 by Christoph Lamprecht. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 # ch.l.ngre@online.de
@@ -10,7 +10,7 @@ use warnings;
 use Carp;
 
 use 5.008;
-our $VERSION = '0.06';
+our $VERSION = '0.11';
 
 sub add_dependent{
     my ($self,$dependent) = @_;

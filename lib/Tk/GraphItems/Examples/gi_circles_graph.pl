@@ -10,7 +10,7 @@ use Data::Dumper;
 my $mw = tkinit();
 
 # our Graph has to be refvertexed to use
-# Tk::GraphItems::TextBox instances for the nodes
+# Tk::GraphItems::Circle instances for the nodes
 
 my $graph = Graph->new(refvertexed=>1);
 my $scrolled_can = $mw -> Scrolled('Canvas',
@@ -52,8 +52,8 @@ sub init_bindings{
     my ($can) = @_;
 
     # create a dummy node on our canvas to call bind_class with.
-    # A call of 'bind_class' on this 'TextBox' instance installs
-    # a binding which will be valid for every 'TextBox' item
+    # A call of 'bind_class' on this 'Circle' instance installs
+    # a binding which will be valid for every 'Circle' item
     # on the same canvas.
     my $node = Tk::GraphItems::Circle->new(canvas => $can,
 					    'x'    => 0,
@@ -99,8 +99,8 @@ sub init_bindings{
 }# end init_bindings
 
 sub new_node{
-    # Create a new TextBox instance and use it as vertex in
-    # our Graph. The TextBox will be destroyed when its vertex
+    # Create a new Circle instance and use it as vertex in
+    # our Graph. The Circle will be destroyed when its vertex
     # gets deleted.
 
     my ( $can,$x,$y ) = @_;

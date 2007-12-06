@@ -16,9 +16,9 @@ Tk::GraphItems::Connector - Display edges of relation-graphs on a Tk::Canvas
 					    source=>$a_TextBox,
 					    target=>$another_TextBox],
 					    );
-  $conn->colour('red');
-  $conn->arrow('both');
-  $conn->width(2);
+  $conn->colour( 'red' );
+  $conn->arrow( 'both' );
+  $conn->width( 2 );
   $conn->detach;
   $conn = undef;
 
@@ -29,10 +29,6 @@ Tk::GraphItems::Connector - Display edges of relation-graphs on a Tk::Canvas
 
 Tk::GraphItems::Connector provides objects to display edges of relation-graphs on a Tk::Canvas widget.
 
-=head1 SEE ALSO
-
-Documentation of Tk::GraphItems::TextBox .
-Examples in Tk/GraphItems/Examples
 
 =head1 METHODS
 
@@ -40,7 +36,7 @@ B<Tk::GraphItems::Connector> supports the following methods:
 
 =over 4
 
-=item B<new(>source      => $a_GraphItems-Node,
+=item B<new(> source      => $a_GraphItems-Node,
              target      => $a_GraphItems-NodeB,
              colour      => $a_TkColour,
              width       => $width_pixels,
@@ -51,19 +47,19 @@ B<Tk::GraphItems::Connector> supports the following methods:
 Create a new Connector instance and  display it on the Canvas of 'source' and 'target'.
 If 'autodestroy' is set to a true value, the Connector will get destroyed when its reference goes out of scope. This is recommended for easy use with Graph.pm or other models which allow to store objects for their edges. See gi-graph.pl for an example. The default for 'autodestroy' is 0. That means the Connector will stay 'alive' until either one of its source/target nodes gets destroyed or Connector->detach is called and references to Connector are deleted.
 
-=item B<colour(>[$a_Tk_colour]B<)>
+=item B<colour(> [$a_Tk_colour] B<)>
 
 Sets the colour to $a_Tk_colour, if the argument is given. Returns the current colour, if called without an argument.
 
-=item B<arrow(>'source'|'target'|'none'|'both'B<)>
+=item B<arrow(> 'source'|'target'|'none'|'both' B<)>
 
 Sets the style of the Connectors line-endings. Defaults to 'target'.
 
-=item B<width(>$line_widthB<)>
+=item B<width(> $line_width B<)>
 
-Sets Connectors linewidth in pixels. Defaults to 1.
+Sets Connectors linewidth in points. Defaults to 1.
 
-=item B<bind_class(>'event',$coderefB<)>
+=item B<bind_class(> 'event', $coderef B<)>
 
 Binds the given 'event' sequence to $coderef. This binding will exist for all Connector instances on the Canvas displaying the invoking object. The binding will not exist for Connectors that are displayed on other Canvas instances. The Connector instance which is the 'current' one at the time the event is triggered will be passed to $coderef as an argument. If $coderef contains an empty string, the binding for 'event' is deleted.
 
@@ -74,13 +70,18 @@ Detach the Connector instance from its source and target so it can be DESTROYED.
 
 =back
 
+=head1 SEE ALSO
+
+Documentation of Tk::GraphItems::TextBox .
+Examples in Tk/GraphItems/Examples
+
 =head1 AUTHOR
 
 Christoph Lamprecht, ch.l.ngre@online.de
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Christoph Lamprecht
+Copyright (C) 2007 by Christoph Lamprecht
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.7 or,
@@ -89,7 +90,7 @@ at your option, any later version of Perl 5 you may have available.
 
 =cut
 use 5.008;
-our $VERSION = '0.06';
+our $VERSION = '0.11';
 
 use Scalar::Util qw(weaken);
 #use Data::Dumper;
@@ -237,18 +238,24 @@ sub colour{
 	return $can->itemcget($self->{line_id},'-fill');
     }
 }
+
 sub arrow{
-    my ($self,$arr_type) = @_;
-    if ( ! $arrow{$arr_type}) {
-	croak " setting arrow to <$arr_type> not possible.\n"
-	    ."Arrow type must be one of \n"
-		.join ("\n",keys %arrow)
-		    ."\n$@";
-    }
+    my $self = shift;
+    my ($arr_type) = $_[0];
     my $can = $self->get_canvas;
-    $can->itemconfigure($self->{line_id},-arrow=>$arrow{$arr_type}||'last');
-    $self;
+    if ( defined $arr_type){
+        if ( ! $arrow{$arr_type}) {
+            croak " setting arrow to <$arr_type> not possible.\n"
+                ."Arrow type must be one of \n"
+                    .join ("\n",keys %arrow)
+                        ."\n$@";
+        }
+        $can->itemconfigure($self->{line_id},-arrow=>$arrow{$arr_type}||'last');
+        return $self;
+    }
+    return $can->itemcget($self->{line_id},'-arrow');
 }
+
 sub width{
     my $self = shift;
     my $can = $self->get_canvas;
@@ -260,6 +267,7 @@ sub width{
 	return $can->itemcget($self->{line_id},'-width');
     }
 }
+
 sub position_changed{
     my ($self,$master) = @_;
     my  $first = $self->{master}{$master};
