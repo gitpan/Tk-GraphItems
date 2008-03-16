@@ -13,9 +13,9 @@ Tk::GraphItems::Connector - Display edges of relation-graphs on a Tk::Canvas
 
 
   my $conn = Tk::GraphItems::Connector->new(
-					    source=>$a_TextBox,
-					    target=>$another_TextBox],
-					    );
+                                            source => $a_TextBox,
+                                            target => $another_TextBox,
+                                            );
   $conn->colour( 'red' );
   $conn->arrow( 'both' );
   $conn->width( 2 );
@@ -101,76 +101,76 @@ use Carp;
 require Tk::GraphItems::GraphItem;
 our @ISA = ('Tk::GraphItems::GraphItem');
 my %arrow=(source=>'first',
-	   first =>'first',
-	   target=>'last',
-	   last  =>'last',
-	   1     =>'last',
-	   both  =>'both',
-	   all   =>'both',
-	   none  =>'none',
-	   0     =>'none');
-sub new{
-    my $class= shift;
+           first =>'first',
+           target=>'last',
+           last  =>'last',
+           1     =>'last',
+           both  =>'both',
+           all   =>'both',
+           none  =>'none',
+           0     =>'none');
+sub initialize{
+    my $self = shift;
     if (@_%2) {
-	croak "wrong number of args! ";
+        croak "wrong number of args! ";
     }
     my %args = @_;
     my ($source,$target,$colour,$width,$arrow_type,$autodestroy) = 
-	@args{qw/source target colour width arrow autodestroy/};
+        @args{qw/source target colour width arrow autodestroy/};
     $arrow_type ||= 'target';
     for (qw/source target/) {
-	my $node = $args{$_};
-	eval{$node->isa('Tk::GraphItems::Node')}
-	    ||croak " argument '$_': <$node> is no valid GraphItem::Node! $@ ";
+        my $node = $args{$_};
+        eval{$node->isa('Tk::GraphItems::Node')}
+            ||croak " argument '$_': <$node> is no valid GraphItem::Node! $@ ";
     }
-    ;
+    
     my $can =$source->get_canvas ;
     if ($can ne $target->get_canvas) {
-	croak "Can't connect Nodes on different Canvases!";
+        croak "Can't connect Nodes on different Canvases!";
     }
 
     my @coords ;
     for ($source, $target) {
-	push @coords, $_->connector_coords();
+        push @coords, $_->connector_coords();
     }
-    ;
+    
 
     my $id = eval{$can->createLine(@coords,
-				   -fill      => $colour||'black',
-				   -width     => $width||1,
-				   -tags      =>[
-						 'ConnectorBind'],
-				   -arrow     =>$arrow{$arrow_type}||'last',
-				   -arrowshape=>[7,9,3],
-			       )};
+                                   -fill      => $colour||'black',
+                                   -width     => $width||1,
+                                   -tags      =>[
+                                                 'ConnectorBind'],
+                                   -arrow     =>$arrow{$arrow_type}||'last',
+                                   -arrowshape=>[7,9,3],
+                               )};
     if ($@) {
-	croak "Connector creation failed: $@";
+        croak "Connector creation failed: $@";
     }
 
 
-    my $self  = {line_id     => $id,
-		 dependents  => {},
-		 canvas      => $can,
-		 source      => $source,
-		 target      => $target,
-		 autodestroy => $autodestroy ||= 0};
-    bless $self , $class;
-    $self->_register_instance;
+    $self->{line_id}     =  $id;
+    $self->{dependents}  =  {};
+    $self->{canvas}      =  $can;
+    $self->{source}      =  $source;
+    $self->{target}      =  $target;
+    $self->{autodestroy} =  $autodestroy ||= 0;
+
+    $self->SUPER::initialize;
+
     $self->_set_layer(0);
     for (qw/source target/) {
-	if ($autodestroy) {
-	    $self->{$_}->add_dependent_weak($self);
-	} else {
-	    $self->{$_}->add_dependent($self);
-	}
-	$self->set_master($_,$self->{$_});
-	weaken($self->{$_});
+        if ($autodestroy) {
+            $self->{$_}->add_dependent_weak($self);
+        } else {
+            $self->{$_}->add_dependent($self);
+        }
+        $self->set_master($_,$self->{$_});
+        weaken($self->{$_});
     }
     for (qw/source target/) {
-	$self->set_coords($_,$self->{$_}->connector_coords($self))
+        $self->set_coords($_,$self->{$_}->connector_coords($self))
     }
-    ;
-    $self;
+    return $self;
 }
 
 
@@ -186,10 +186,10 @@ sub destroy_myself{
 sub detach{
     my $self = shift;
     for (@$self{qw/source target/}) {
-	if (UNIVERSAL::can($_ , 'remove_dependent')) {
-	    # print"d_f_m $_\n";
-	    $_->remove_dependent($self);
-	}
+        if (UNIVERSAL::can($_ , 'remove_dependent')) {
+            # print"d_f_m $_\n";
+            $_->remove_dependent($self);
+        }
     }
 }
 
@@ -198,10 +198,10 @@ sub get_coords{
     my ($can,$id) = @$self{qw/canvas line_id/};
     my @coords = $can->coords($id);
     if (($where||'') eq 'source') {
-	splice (@coords,-2);
+        splice (@coords,-2);
     }
     if (($where||'') eq 'target') {
-	splice (@coords,0,2);
+        splice (@coords,0,2);
     }
     return wantarray ? @coords : \@coords;
 }
@@ -210,13 +210,13 @@ sub set_coords{
     my ($self,$where,$x,$y)=@_;
     my ($can,$l_id) = @$self{qw/canvas line_id/};
     if ($where !~ /source|target/) {
-	return;
+        return;
     }
     my @coords = $can->coords($l_id);
     if ($where eq 'source') {
-	@coords[0,1] = ($x,$y);
+        @coords[0,1] = ($x,$y);
     } else {
-	@coords[2,3] = ($x,$y);
+        @coords[2,3] = ($x,$y);
     }
     $can->coords($l_id,@coords);
 }
@@ -231,11 +231,11 @@ sub colour{
     my $self = shift;
     my $can = $self->get_canvas;
     if (@_) {
-	eval{$can->itemconfigure($self->{line_id},-fill=>$_[0]);};
-	croak " setting colour to <$_[0]> not possible: $@" if $@;
-	return $self;
+        eval{$can->itemconfigure($self->{line_id},-fill=>$_[0]);};
+        croak " setting colour to <$_[0]> not possible: $@" if $@;
+        return $self;
     } else {
-	return $can->itemcget($self->{line_id},'-fill');
+        return $can->itemcget($self->{line_id},'-fill');
     }
 }
 
@@ -260,11 +260,11 @@ sub width{
     my $self = shift;
     my $can = $self->get_canvas;
     if (@_) {
-	eval{$can->itemconfigure($self->{line_id},-width=>$_[0]);};
-	croak " setting width to <$_[0]> not possible: $@" if $@;
-	return $self;
+        eval{$can->itemconfigure($self->{line_id},-width=>$_[0]);};
+        croak " setting width to <$_[0]> not possible: $@" if $@;
+        return $self;
     } else {
-	return $can->itemcget($self->{line_id},'-width');
+        return $can->itemcget($self->{line_id},'-width');
     }
 }
 
@@ -273,9 +273,9 @@ sub position_changed{
     my  $first = $self->{master}{$master};
     my  $second= $first eq 'source'?'target':'source';
     for my $where ($first,$second) {
-	$master = $self->{$where};
-	my ($x,$y) = $master->connector_coords($self);
-	$self->set_coords($where,$x,$y);
+        $master = $self->{$where};
+        my ($x,$y) = $master->connector_coords($self);
+        $self->set_coords($where,$x,$y);
     }
 }
 

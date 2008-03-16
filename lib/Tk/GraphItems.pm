@@ -76,10 +76,11 @@ at your option, any later version of Perl 5 you may have available.
 use warnings;
 use strict;
 package Tk::GraphItems;
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 require Tk::GraphItems::TextBox;
 require Tk::GraphItems::Circle;
 require Tk::GraphItems::Connector;
+require Tk::GraphItems::LabeledConnector;
 
 sub TextBox{
     if ($_[0]){
@@ -102,5 +103,12 @@ sub Circle{
         return 'Tk::GraphItems::Circle'->new(@_);
     }
     return 'Tk::GraphItems::Circle';
+}
+sub LabeledConnector{
+    if ($_[0]){
+        shift;
+        return 'Tk::GraphItems::LabeledConnector'->new(@_);
+    }
+    return 'Tk::GraphItems::LabeledConnector';
 }
 1;

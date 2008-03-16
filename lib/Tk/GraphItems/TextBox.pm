@@ -12,10 +12,10 @@ Tk::GraphItems::TextBox - Display nodes of relation-graphs on a Tk::Canvas
   require Tk::GraphItems::Connector;
   ...
   my $node = Tk::GraphItems::TextBox->new( canvas=> $can,
-					   text  => "new_node",
+                                           text  => "new_node",
                                            font  => ['Courier',8],
-					   x   => 50,
-				       	   y   => 50 );
+                                           x   => 50,
+                                                  y   => 50 );
   $node->move( 10, 0 );
   $node->set_coords( 50, 50 );
   $node->text( $node->text()."\nanother_line" );
@@ -109,16 +109,16 @@ require Tk::GraphItems::TiedCoord;
 our @ISA = ('Tk::GraphItems::Node');
 
 
-sub new{
-    my $class = shift;
-    if (ref $class) {
-	croak "new has to be called on a class-name!";
-    }
+sub initialize{
+    my $self = shift;
+
     if (@_%2) {
-	croak "wrong number of args! ";
+        croak "wrong number of args! ";
     }
+    
     my %args = @_;
-    my ($can,$x,$y,$text,$font) = @args{qw/canvas x y text font/};
+    my ($can,$x,$y,$text,$font,$colour)
+        = @args{qw/canvas x y text font colour/};
     eval {$can->isa('Tk::Canvas')};
     croak "this is not a 'Canvas':<$can> $@" if $@;
     unless ($can->Exists){croak "This Canvas does not Exist:<$can>"};
@@ -126,13 +126,13 @@ sub new{
     my @coords;
     @coords= map {ref($_)?$$_:$_} ($x,$y);
     my @font = (-font=>$font) if $font;
-    
+
     eval{$text_id = $can->createText(@coords,
-				     -text => $text,
-				     @font,
-				     -tags =>['TextBoxText',
-					      'TextBox',
-					      'TextBoxBind']);
+                                     -text => $text,
+                                     @font,
+                                     -tags =>['TextBoxText',
+                                              'TextBox',
+                                              'TextBoxBind']);
      };
     croak "could not create TextBox at coords <$x>,<$y>: $@" if $@;
 
@@ -140,25 +140,26 @@ sub new{
     my @bbox =  $can->bbox($text_id);
     @bbox = ($bbox[0] -$p,$bbox[1]-$p,$bbox[2]+$p,$bbox[3]+$p);
     my $box_id  = $can->createRectangle(
-					@bbox,
-					-fill  => 'white',
-					-tags  =>['TextBoxBox',
-						  'TextBox',
-						  'TextBoxBind']);
-    my $self  = {text_id    => $text_id,
-		 box_id     => $box_id,
-		 dependents => {},
-		 canvas     => $can,
-	     };
-    bless $self , $class;
-    $self->_register_instance;
+                                        @bbox,
+                                        -fill  => 'white',
+                                        -tags  =>['TextBoxBox',
+                                                  'TextBox',
+                                                  'TextBoxBind']);
+    $self->{text_id}    = $text_id;
+    $self->{box_id}     = $box_id;
+    $self->{dependents} = {};
+    $self->{canvas}     = $can;
+    
+    $self->SUPER::initialize;
+
     $self->_create_canvas_layers;
     $self->_set_layer(2); 
     $self->_set_canvas_bindings;
     if (ref $x and ref $y) {
-	$self->_tie_coords($x,$y);
+        $self->_tie_coords($x,$y);
     }
-    $self;
+    $self->colour($colour) if $colour;
+    return $self;
 
 }
 
@@ -189,7 +190,7 @@ sub connector_coords{
     my ($self,$dependent) = @_;
     my ($x,$y) = $self->get_coords;
     if (!defined $dependent){
-	return($x,$y);
+        return($x,$y);
     }
     my $where = $dependent->{master}{$self};
     my $other = $where eq 'source'? 'target':'source';
@@ -200,25 +201,25 @@ sub connector_coords{
     my $b_r = $height / $width;
     my $c_r= ($c_c->[1]-$y)/(($c_c->[0]-$x)||0.01);
     if (abs ($b_r) > abs ($c_r)) { #r or l
-	if ($c_c->[0] > $x) {	#right
-	    #print "right\n";
-	    $x = $bbox[2];
-	    $y = $y+($c_r * $width /2);
-	} else {		#left
-	    #print "left\n";
-	    $x = $bbox[0];
-	    $y = $y-($c_r * $width /2);
-	}
-    } else {			# b or t
-	if ($c_c->[1] < $y) {	#top
-	    #print "top\n";
-	    $y = $bbox[1];
-	    $x = $x-((1/($c_r||0.01))*$height /2);
-	} else {		#bottom
-	    #print "bottom\n";
-	    $y = $bbox[3];
-	    $x = $x+((1/($c_r||0.01))*$height /2);
-	}
+        if ($c_c->[0] > $x) {        #right
+            #print "right\n";
+            $x = $bbox[2];
+            $y = $y+($c_r * $width /2);
+        } else {                #left
+            #print "left\n";
+            $x = $bbox[0];
+            $y = $y-($c_r * $width /2);
+        }
+    } else {                        # b or t
+        if ($c_c->[1] < $y) {        #top
+            #print "top\n";
+            $y = $bbox[1];
+            $x = $x-((1/($c_r||0.01))*$height /2);
+        } else {                #bottom
+            #print "bottom\n";
+            $y = $bbox[3];
+            $x = $x+((1/($c_r||0.01))*$height /2);
+        }
     }
     return($x,$y);
 
@@ -234,7 +235,7 @@ sub _set_coords{
     $can->coords($b_id,@bbox);
 
     for ($self->dependents) {
-	$_->position_changed($self);
+        $_->position_changed($self);
     }
 }
 
@@ -242,12 +243,12 @@ sub text{
     my $self = shift;
     my $can = $self->get_canvas;
     if (@_) {
-	$can->itemconfigure($self->{text_id},-text=>$_[0]);
-	#call _set_coords to resize TextBox
-	$self->_set_coords($self->get_coords);
-	return $self;
+        $can->itemconfigure($self->{text_id},-text=>$_[0]);
+        #call _set_coords to resize TextBox
+        $self->_set_coords($self->get_coords);
+        return $self;
     } else {
-	return $can->itemcget($self->{text_id},'-text');
+        return $can->itemcget($self->{text_id},'-text');
     }
 }
 
@@ -255,11 +256,11 @@ sub colour{
     my $self = shift;
     my $can = $self->get_canvas;
     if (@_) {
-	eval{$can->itemconfigure($self->{box_id},-fill=>$_[0]);};
-	croak " setting colour to <$_[0]> not possible: $@" if $@;
-	return $self;
+        eval{$can->itemconfigure($self->{box_id},-fill=>$_[0]);};
+        croak " setting colour to <$_[0]> not possible: $@" if $@;
+        return $self;
     } else {
-	return $can->itemcget($self->{box_id},'-fill');
+        return $can->itemcget($self->{box_id},'-fill');
     }
 }
 sub get_coords{

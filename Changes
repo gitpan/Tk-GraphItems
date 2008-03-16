@@ -1,5 +1,7 @@
 Revision history for Perl extension Tk::GraphItems.
 
+0.12  added LabeledConnectors (suggested by Serge Fleury)
+
 0.11  More and better tests 
       Better examples
 

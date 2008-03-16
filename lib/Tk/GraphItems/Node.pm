@@ -23,25 +23,25 @@ our @ISA = qw/ Tk::GraphItems::GraphItem /;
 
 
 {
-my %iinfo = (-text=>1);		# item information hash
+my %iinfo = (-text=>1);                # item information hash
 
 sub _set_canvas_bindings_for_tag{
     my ($self,$tag) = @_;
     my $can = $self->{canvas};
 
     $can->bind($tag,'<1>' => sub {
-		   my($can) = @_;
-		   my $e    = $can->XEvent;
-		   _items_start_drag ($can, $e->x, $e->y, \%iinfo);
-	       }
-	   );
+                   my($can) = @_;
+                   my $e    = $can->XEvent;
+                   _items_start_drag ($can, $e->x, $e->y, \%iinfo);
+               }
+           );
     $can->bind($tag,'<B1-Motion>' =>sub {
-		   _items_drag ($can,
-				$Tk::event->x,
-				$Tk::event->y,
-				\%iinfo);
-	       }
-	   );
+                   _items_drag ($can,
+                                $Tk::event->x,
+                                $Tk::event->y,
+                                \%iinfo);
+               }
+           );
 }
 } #end scope of iinfo
 
@@ -75,8 +75,8 @@ sub _items_start_drag {
 sub move{
     my $self = shift;
     looks_like_number($_)||
-	croak "method 'move' failed: args <$_[0]>,<$_[1]> have to be numbers!"
-	    for (@_[0,1]);
+        croak "method 'move' failed: args <$_[0]>,<$_[1]> have to be numbers!"
+            for (@_[0,1]);
     $self->_move(@_);
 }
 
@@ -88,13 +88,13 @@ sub _move{
 sub set_coords{
     my $self = shift;
     if (ref $_[0]&& ref$_[1]) {
-	$self->_tie_coords(@_);
-	return;
+        $self->_tie_coords(@_);
+        return;
     }
     for ( @_[0,1] ) {
-	looks_like_number($_)||
-	    croak "method 'set_coords' failed:\n"
-		 ."args <$_[0]>,<$_[1]> have to be numbers!";
+        looks_like_number($_)||
+            croak "method 'set_coords' failed:\n"
+                 ."args <$_[0]>,<$_[1]> have to be numbers!";
     }
     $self->_set_coords(@_);
 }
@@ -109,7 +109,7 @@ sub _tie_coords{
 sub _untie_coords{
     my $self = shift;
     for (@$self{qw/tiedx tiedy/}) {
-	untie ${$_} ;		#if tied $$_
+        untie ${$_} ;                #if tied $$_
     }
 }
 

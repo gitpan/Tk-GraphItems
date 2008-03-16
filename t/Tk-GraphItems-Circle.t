@@ -11,7 +11,14 @@ require_ok ('Tk::GraphItems::Connector');
 
 use strict;
 use warnings;
-my $mw = tkinit();
+
+SKIP:{
+
+my $mw = eval{ tkinit()};
+skip 'Tk::MainWindow instantiation failed - skipping Tk-GraphItems-Circle.t',
+      23 if $@;
+
+
 my $can = $mw -> Canvas()->pack(-fill  =>'both',
 				-expand=>1);
 
@@ -144,7 +151,6 @@ ok (($node[0]->was_dragged),'node was_dragged');
 my $coords = $node[0]->get_coords;
 is_deeply($coords,[100,100],'drag_binding coords ok');
 
-
-;
+} #end SKIP
 
 __END__

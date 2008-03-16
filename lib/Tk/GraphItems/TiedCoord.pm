@@ -6,13 +6,13 @@
 package Tk::GraphItems::TiedCoord;
 use strict;
 use warnings;
-use Scalar::Util(qw/weaken/);
+use Scalar::Util (qw/weaken/);
 our $VERSION = '0.11';
 
 sub TIESCALAR{
     my($class,$t_b,$c_in)=@_;
     my $self =  bless{TkGNode      =>$t_b,
-		      coord_index  =>$c_in},$class;
+                      coord_index  =>$c_in},$class;
     weaken ($self->{TkGNode});
     $self;
 }
@@ -21,7 +21,7 @@ sub FETCH{
     my $self = shift;
     my $i = $self->{coord_index};
     if ($self->{TkGNode}) {
-	return ($self->{TkGNode}->get_coords)[$i];
+        return ($self->{TkGNode}->get_coords)[$i];
     }
     return $self->{cached}[$i]||0;
 }

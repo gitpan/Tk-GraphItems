@@ -12,7 +12,14 @@ require_ok ('Tk::GraphItems::Connector');
 
 use strict;
 use warnings;
-my $mw = tkinit();
+
+
+SKIP:{
+
+my $mw = eval{ tkinit()};
+skip 'Tk::MainWindow instantiation failed - skipping Tk-GraphItems-TextBox.t',
+      31 if $@;
+
 my $s_can = $mw -> Scrolled('Canvas',
 			    -scrollregion=>[0,0,200,700],
 			)->pack(-fill  =>'both',
@@ -231,5 +238,7 @@ $node[0] = $node[1] = $conn=  undef;
 
 my @items = $can->find('all');
 is( @items, 3, 'Canvas items destroyed');
+
+} #end SKIP
 
 __END__

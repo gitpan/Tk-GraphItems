@@ -95,7 +95,7 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 use 5.008;
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 #use Data::Dumper;
 use Carp;
@@ -107,13 +107,11 @@ require Tk::GraphItems::TiedCoord;
 our @ISA = ('Tk::GraphItems::Node');
 
 
-sub new{
-    my $class = shift;
-    if (ref $class) {
-	croak "new has to be called on a class-name!";
-    }
+sub initialize{
+    my $self = shift;
+
     if (@_%2) {
-	croak "wrong number of args! ";
+        croak "wrong number of args! ";
     }
     my %args = @_;
     my ($can,$x,$y,$size,$colour) = @args{qw/canvas x y size colour/};
@@ -124,32 +122,31 @@ sub new{
     my @center = map {ref($_)?$$_:$_} ($x,$y);
     $size ||= 10;
     my @coords = ($center[0] - $size/2,
-		  $center[1] - $size/2,
-		  $center[0] + $size/2,
-		  $center[1] + $size/2);
+                  $center[1] - $size/2,
+                  $center[0] + $size/2,
+                  $center[1] + $size/2);
     my @colour = (-fill => $colour) if ($colour);
     eval{$text_id = $can->createOval(@coords,
-				     -tags =>['Circle',
-					      'CircleBind'],
-				     @colour,
-				 );
+                                     -tags =>['Circle',
+                                              'CircleBind'],
+                                     @colour,
+                                 );
      };
     croak "could not create Circle at coords <$x>,<$y>: $@" if $@;
 
-    my $self  = {circle_id  => $text_id,
-		 dependents => {},
-		 canvas     => $can,
-		 size       => $size,
-	     };
-    bless $self , $class;
-    $self->_register_instance;
+    $self->{circle_id}  = $text_id;
+    $self->{dependents} = {};
+    $self->{canvas}     = $can;
+    $self->{size}       = $size;
+    
+    $self->SUPER::initialize;
     $self->_create_canvas_layers;
     $self->_set_layer(2); 
     $self->_set_canvas_bindings;
     if (ref $x and ref $y) {
-	$self->_tie_coords($x,$y);
+        $self->_tie_coords($x,$y);
     }
-    $self;
+    return $self;
 
 }  #end new
 
@@ -179,7 +176,7 @@ sub connector_coords{
     my ($self,$dependent) = @_;
     my ($x,$y) = $self->get_coords;
     if (!defined $dependent) {
-	return($x,$y);
+        return($x,$y);
     }
     my $where = $dependent->{master}{$self};
     my $other = $where eq 'source'? 'target':'source';
@@ -200,13 +197,13 @@ sub _set_coords{
     my ($can,$circle_id,$size) = @$self{qw/canvas circle_id size/};
     my $radius = $size/2;
     $can->coords($circle_id,
-		 $x - $radius,
-		 $y - $radius,
-		 $x + $radius,
-		 $y + $radius);
+                 $x - $radius,
+                 $y - $radius,
+                 $x + $radius,
+                 $y + $radius);
 
     for ($self->dependents){
-	$_->position_changed($self);
+        $_->position_changed($self);
     }
 }
 
@@ -214,11 +211,11 @@ sub colour{
     my $self = shift;
     my $can = $self->get_canvas;
     if (@_){
-	eval{$can->itemconfigure($self->{circle_id},-fill=>$_[0]);};
-	croak " setting colour to <$_[0]> not possible: $@" if $@;
-	return $self;
+        eval{$can->itemconfigure($self->{circle_id},-fill=>$_[0]);};
+        croak " setting colour to <$_[0]> not possible: $@" if $@;
+        return $self;
     }else{
-	return $can->itemcget($self->{circle_id},'-fill');
+        return $can->itemcget($self->{circle_id},'-fill');
     }
 }
 
@@ -226,12 +223,12 @@ sub size{
     my $self = shift;
     if (@_) {
         looks_like_number($_[0])||
-	    croak "method 'size' failed:\n"
-		 ."arg <$_[0]> has to be a number!";
-	$self->{size} = $_[0];
-	$self->set_coords( $self->get_coords );
+            croak "method 'size' failed:\n"
+                 ."arg <$_[0]> has to be a number!";
+        $self->{size} = $_[0];
+        $self->set_coords( $self->get_coords );
     } else {
-	return $self->{size};
+        return $self->{size};
     }
 }
 sub get_coords{
@@ -239,7 +236,7 @@ sub get_coords{
     my $can = $self->get_canvas;
     my @circle_co = $can->coords($self->{circle_id});
     my @coords = (( $circle_co[0] + $circle_co[2] )/2 ,
-		  ( $circle_co[1] + $circle_co[3] )/2 );
+                  ( $circle_co[1] + $circle_co[3] )/2 );
     return wantarray ? @coords:\@coords;
 }
 
